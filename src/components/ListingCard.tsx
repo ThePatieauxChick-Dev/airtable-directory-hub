@@ -1,5 +1,6 @@
 import { ExternalLink, Instagram, MapPin } from "lucide-react";
 import type { Listing } from "@/lib/airtable";
+import { useCardView, useTrackClick } from "@/hooks/use-listing-analytics";
 
 interface ListingCardProps {
   listing: Listing;
@@ -7,6 +8,10 @@ interface ListingCardProps {
 }
 
 const ListingCard = ({ listing, index }: ListingCardProps) => {
+  const cardRef = useCardView(listing.id, listing.businessName);
+  const trackWebsite = useTrackClick(listing.id, listing.businessName, "website_click");
+  const trackInstagram = useTrackClick(listing.id, listing.businessName, "instagram_click");
+
   const instagramUrl = listing.instagram
     ? listing.instagram.startsWith("http")
       ? listing.instagram
@@ -15,6 +20,7 @@ const ListingCard = ({ listing, index }: ListingCardProps) => {
 
   return (
     <article
+      ref={cardRef as React.RefObject<HTMLElement>}
       className="group bg-card rounded-lg overflow-hidden border border-border shadow-sm hover:shadow-md transition-all duration-300 opacity-0 animate-fade-in"
       style={{ animationDelay: `${index * 80}ms` }}
     >
@@ -85,6 +91,7 @@ const ListingCard = ({ listing, index }: ListingCardProps) => {
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-sm font-sans text-foreground hover:text-accent transition-colors"
+              onClick={trackWebsite}
             >
               <ExternalLink className="h-3.5 w-3.5" />
               Website
@@ -96,6 +103,7 @@ const ListingCard = ({ listing, index }: ListingCardProps) => {
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-sm font-sans text-foreground hover:text-accent transition-colors"
+              onClick={trackInstagram}
             >
               <Instagram className="h-3.5 w-3.5" />
               Instagram
