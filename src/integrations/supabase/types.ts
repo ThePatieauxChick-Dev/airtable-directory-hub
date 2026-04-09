@@ -65,6 +65,30 @@ export type Database = {
         }
         Relationships: []
       }
+      listing_analytics: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          listing_id: string
+          listing_name: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          listing_id: string
+          listing_name?: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          listing_id?: string
+          listing_name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
