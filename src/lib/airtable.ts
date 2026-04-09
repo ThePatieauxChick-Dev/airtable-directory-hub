@@ -20,7 +20,7 @@ function parseRecord(record: any): Listing {
     businessName: f["Business Name"] || f["Name"] || "Untitled",
     businessPhoto: f["Business Photo"]?.[0]?.url || f["Business Photo"] || null,
     ownerHeadshot: f["Owner Headshot"]?.[0]?.url || f["Owner Headshot"] || null,
-    category: f["Category"] || "Uncategorized",
+    category: Array.isArray(f["Category"]) ? f["Category"][0] : (f["Category"] || "Uncategorized"),
     location: f["Location"] || "Unknown",
     description: f["Business Description"] || f["Description"] || "",
     priceRange: f["Price Range"] || "",
