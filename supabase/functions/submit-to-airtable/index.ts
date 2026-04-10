@@ -3,8 +3,13 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const AIRTABLE_BASE_ID = "appnyHwteIfAl2Mwh";
-const AIRTABLE_TABLE_ID = "tblUDkirweEjepVji";
+function getRequiredEnv(name: string): string {
+  const value = Deno.env.get(name);
+  if (!value) {
+    throw new Error(`${name} is not configured`);
+  }
+  return value;
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -18,18 +23,13 @@ Deno.serve(async (req) => {
     });
   }
 
-  const AIRTABLE_API_KEY = Deno.env.get("AIRTABLE_API_KEY");
-  if (!AIRTABLE_API_KEY) {
-    return new Response(
-      JSON.stringify({ error: "AIRTABLE_API_KEY is not configured" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-  }
-
   try {
+    const AIRTABLE_API_KEY = getRequiredEnv("AIRTABLE_API_KEY");
+    const AIRTABLE_BASE_ID = getRequiredEnv("AIRTABLE_BASE_ID");
+    const AIRTABLE_TABLE_ID = getRequiredEnv("AIRTABLE_TABLE_ID");
+
     const body = await req.json();
 
-    // Validate required fields
     if (!body.ownerName || !body.email || !body.businessName || !body.category || !body.location) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
@@ -37,7 +37,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Validate email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(body.email)) {
       return new Response(
@@ -46,13 +45,12 @@ Deno.serve(async (req) => {
       );
     }
 
-    const fields: Record<string, any> = {
+    const fields: Record<string, string> = {
       "Business Name": String(body.businessName).slice(0, 200),
       "Location": String(body.location).slice(0, 200),
       "Business Description": String(body.description || "").slice(0, 2000),
     };
 
-    // Optional fields — only include fields known to exist in Airtable
     if (body.priceRange) fields["Price Range"] = String(body.priceRange).slice(0, 50);
     if (body.website) fields["Website"] = String(body.website).slice(0, 500);
     if (body.instagram) fields["Instagram"] = String(body.instagram).slice(0, 100);
