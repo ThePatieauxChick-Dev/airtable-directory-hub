@@ -3,24 +3,32 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const AIRTABLE_BASE_ID = "appnyHwteIfAl2Mwh";
-const AIRTABLE_TABLE_ID = "tblUDkirweEjepVji";
+function getRequiredEnv(name: string): string {
+  const value = Deno.env.get(name);
+  if (!value) {
+    throw new Error(`${name} is not configured`);
+  }
+  return value;
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  const AIRTABLE_API_KEY = Deno.env.get("AIRTABLE_API_KEY");
-  if (!AIRTABLE_API_KEY) {
-    return new Response(
-      JSON.stringify({ error: "AIRTABLE_API_KEY is not configured" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+  if (req.method !== "GET" && req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
   try {
-    const allRecords: any[] = [];
+    const AIRTABLE_API_KEY = getRequiredEnv("AIRTABLE_API_KEY");
+    const AIRTABLE_BASE_ID = getRequiredEnv("AIRTABLE_BASE_ID");
+    const AIRTABLE_TABLE_ID = getRequiredEnv("AIRTABLE_TABLE_ID");
+
+    const allRecords: unknown[] = [];
     let offset: string | undefined;
 
     do {
@@ -29,7 +37,7 @@ Deno.serve(async (req) => {
       });
       if (offset) params.set("offset", offset);
 
-      const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_ID}?${params}`;
+      const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_ID}?${params.toString()}`;
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${AIRTABLE_API_KEY}`,
@@ -42,8 +50,10 @@ Deno.serve(async (req) => {
       }
 
       const data = await response.json();
-      allRecords.push(...data.records);
-      offset = data.offset;
+      if (Array.isArray(data.records)) {
+        allRecords.push(...data.records);
+      }
+      offset = typeof data.offset === "string" ? data.offset : undefined;
     } while (offset);
 
     return new Response(JSON.stringify({ records: allRecords }), {

@@ -10,7 +10,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "install:deps": "./scripts/install-deps.sh",
+    "dev:clean-env": "env -u HTTP_PROXY -u HTTPS_PROXY -u http_proxy -u https_proxy -u npm_config_http_proxy -u npm_config_https_proxy npm run dev"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
