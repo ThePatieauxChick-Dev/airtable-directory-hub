@@ -7,7 +7,7 @@ import ListingCard from "@/components/ListingCard";
 import ListingDetailDialog from "@/components/ListingDetailDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Menu, Sparkles, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Menu, Sparkles, X } from "lucide-react";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
