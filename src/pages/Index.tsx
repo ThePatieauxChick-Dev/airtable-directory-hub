@@ -7,7 +7,7 @@ import ListingCard from "@/components/ListingCard";
 import ListingDetailDialog from "@/components/ListingDetailDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Menu, Sparkles, X } from "lucide-react";
+import { Menu, Sparkles, X } from "lucide-react";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -59,13 +59,19 @@ const Index = () => {
           locations={locations}
           selectedCategory={selectedCategory}
           selectedLocation={selectedLocation}
-          onCategoryChange={(v) => { setSelectedCategory(v); setSidebarOpen(false); }}
-          onLocationChange={(v) => { setSelectedLocation(v); setSidebarOpen(false); }}
+          onCategoryChange={(v) => {
+            setSelectedCategory(v);
+            setSidebarOpen(false);
+          }}
+          onLocationChange={(v) => {
+            setSelectedLocation(v);
+            setSidebarOpen(false);
+          }}
           totalListings={filtered.length}
         />
       </div>
 
-      <div className="flex-1 flex flex-col min-h-screen min-w-0">
+      <div className="flex-1 flex flex-col min-h-screen">
         <header className="sticky top-0 z-30 bg-background/85 backdrop-blur-md border-b border-border px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button onClick={() => setSidebarOpen(!sidebarOpen)} className="lg:hidden p-2 rounded-md hover:bg-muted transition-colors">
@@ -85,7 +91,7 @@ const Index = () => {
             </div>
             <div>
               <h1 className="font-display text-2xl md:text-3xl font-semibold text-foreground">
-                <span className="text-gradient-brand">The Patieaux Chick</span> Directory
+                <span className="text-gradient-brand">Patio Business</span> Directory
               </h1>
               <p className="font-editorial text-sm text-muted-foreground italic hidden sm:block">
                 A trusted space to discover businesses with warmth, excellence, and intention.
@@ -99,19 +105,16 @@ const Index = () => {
 
         <main className="flex-1 px-6 py-8 max-w-[1400px] mx-auto w-full space-y-8">
           <section className="rounded-2xl border border-border bg-gradient-to-r from-secondary to-secondary/60 p-6 md:p-8">
-            <div className="mb-4 inline-flex items-center gap-3 rounded-xl border border-border bg-background/70 px-3 py-2">
-              <div className="h-10 w-10 rounded-md bg-card p-1 overflow-hidden">
-                <img src="/brand-logo.png" alt="The Patieaux Chick brand logo" className="h-full w-full object-contain" />
-              </div>
-              <span className="text-xs uppercase tracking-[0.14em] text-muted-foreground font-sans">Directory Brand Logo</span>
-            </div>
             <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-accent font-sans mb-3">
               <Sparkles className="h-3.5 w-3.5" />
               Curated Community
             </p>
-            <h2 className="font-display text-2xl md:text-3xl text-foreground">More Than Outdoor Living—It’s a Lifestyle.</h2>
+            <h2 className="font-display text-2xl md:text-3xl text-foreground">
+              More Than Outdoor Living—It’s a Lifestyle.
+            </h2>
             <p className="font-editorial text-muted-foreground italic mt-2 max-w-3xl">
-              Heyyy Suga! Browse elevated, community-trusted businesses. Tap any card for the full story, services, and direct contact details.
+              Heyyy Suga! Browse elevated, community-trusted businesses. Tap any card for the full story, services,
+              and direct contact details.
             </p>
           </section>
 
@@ -129,7 +132,9 @@ const Index = () => {
 
           {error && (
             <div className="text-center py-20">
-              <p className="font-editorial text-lg text-muted-foreground italic">We couldn&apos;t load the directory right now. Please try again shortly.</p>
+              <p className="font-editorial text-lg text-muted-foreground italic">
+                We couldn&apos;t load the directory right now. Please try again shortly.
+              </p>
             </div>
           )}
 
@@ -154,7 +159,11 @@ const Index = () => {
         </footer>
       </div>
 
-      <ListingDetailDialog listing={selectedListing} open={!!selectedListing} onOpenChange={(open) => !open && setSelectedListing(null)} />
+      <ListingDetailDialog
+        listing={selectedListing}
+        open={!!selectedListing}
+        onOpenChange={(open) => !open && setSelectedListing(null)}
+      />
     </div>
   );
 };

@@ -48,9 +48,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    const fields: Record<string, AirtableFieldValue> = {
+    const fields: Record<string, string | boolean> = {
       "Owner Name": String(body.ownerName).slice(0, 200),
-      "Email": String(body.email).slice(0, 255),
       "Business Name": String(body.businessName).slice(0, 200),
       "Category": String(body.category).slice(0, 100),
       "Location": String(body.location).slice(0, 200),
@@ -59,8 +58,8 @@ Deno.serve(async (req) => {
       "Email Selected": Boolean(body.emailSelected),
     };
 
-    if (body.headshot) fields["Headshot"] = [{ url: String(body.headshot).slice(0, 1000) }];
-    if (body.businessPhoto) fields["Business Photo"] = [{ url: String(body.businessPhoto).slice(0, 1000) }];
+    if (body.headshot) fields["Headshot"] = String(body.headshot).slice(0, 1000);
+    if (body.businessPhoto) fields["Business Photo"] = String(body.businessPhoto).slice(0, 1000);
     if (body.servicesOffered) fields["Services Offered"] = String(body.servicesOffered).slice(0, 2000);
     if (body.priceRange) fields["Price Range"] = String(body.priceRange).slice(0, 50);
     if (body.website) fields["Website"] = String(body.website).slice(0, 500);

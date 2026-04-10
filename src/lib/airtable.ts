@@ -4,7 +4,6 @@ export interface Listing {
   id: string;
   businessName: string;
   ownerName: string;
-  email: string | null;
   businessPhoto: string | null;
   ownerHeadshot: string | null;
   category: string;
@@ -90,22 +89,21 @@ function parseRecord(record: unknown): Listing | null {
 
   return {
     id,
-    businessName: asString(pickField(fields, "Business Name", "Name", "business_name")) || "Untitled",
-    ownerName: asString(pickField(fields, "Owner Name", "owner_name")),
-    email: asStringOrNull(pickField(fields, "Email", "email")),
-    businessPhoto: extractAttachmentUrl(pickField(fields, "Business Photo", "business_photo")),
-    ownerHeadshot: extractAttachmentUrl(pickField(fields, "Headshot", "Owner Headshot", "owner_headshot")),
+    businessName: asString(fields["Business Name"]) || asString(fields["Name"]) || "Untitled",
+    ownerName: asString(fields["Owner Name"]),
+    businessPhoto: extractAttachmentUrl(fields["Business Photo"]),
+    ownerHeadshot: extractAttachmentUrl(fields["Headshot"]) || extractAttachmentUrl(fields["Owner Headshot"]),
     category: category || "Uncategorized",
-    location: asString(pickField(fields, "Location", "location")) || "Unknown",
-    description: asString(pickField(fields, "Business Description", "Description", "description")) || "",
-    servicesOffered: asString(pickField(fields, "Services Offered", "services_offered")),
-    priceRange: asString(pickField(fields, "Price Range", "price_range")),
-    website: asStringOrNull(pickField(fields, "Website", "website")),
-    instagram: asStringOrNull(pickField(fields, "Instagram Handle", "Instagram", "instagram")),
-    otherSocialMedia: asStringOrNull(pickField(fields, "Other Social Media", "other_social_media")),
-    howToContact: asStringOrNull(pickField(fields, "How to Contact", "how_to_contact", "How To Contact")),
-    contactDetails: asStringOrNull(pickField(fields, "Contact Details", "contact_details")),
-    emailSelected: asBoolean(pickField(fields, "Email Selected", "email_selected")),
+    location: asString(fields["Location"]) || "Unknown",
+    description: asString(fields["Business Description"]) || asString(fields["Description"]) || "",
+    servicesOffered: asString(fields["Services Offered"]),
+    priceRange: asString(fields["Price Range"]),
+    website: asStringOrNull(fields["Website"]),
+    instagram: asStringOrNull(fields["Instagram Handle"]) || asStringOrNull(fields["Instagram"]),
+    otherSocialMedia: asStringOrNull(fields["Other Social Media"]),
+    howToContact: asStringOrNull(fields["How to Contact"]),
+    contactDetails: asStringOrNull(fields["Contact Details"]),
+    emailSelected: asBoolean(fields["Email Selected"]),
   };
 }
 

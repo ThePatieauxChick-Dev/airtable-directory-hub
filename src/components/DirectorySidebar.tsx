@@ -37,7 +37,7 @@ const DirectorySidebar = ({
           The Patieaux Chick
         </p>
         <h2 className="font-display text-xl font-semibold text-sidebar-foreground leading-tight">
-          Patio Guide
+          Patieux Business Directory
         </h2>
         <p className="font-editorial text-sm text-sidebar-foreground/60 italic mt-1">
           {totalListings} curated {totalListings === 1 ? "listing" : "listings"}

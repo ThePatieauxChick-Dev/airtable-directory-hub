@@ -16,7 +16,7 @@ const DirectoryHeader = ({ searchQuery, onSearchChange, totalListings }: Directo
         The Patieaux Chick Presents
       </p>
       <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-semibold text-foreground leading-tight mb-4">
-        Patio Guide Directory
+        Patio Business Directory
       </h1>
       <p className="font-editorial text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 italic">
         A curated collection of businesses we trust, love, and proudly recommend.

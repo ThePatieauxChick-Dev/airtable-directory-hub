@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { ExternalLink, Instagram, Mail, MapPin, MessageCircle, Phone, Tag, User } from "lucide-react";
+import { ExternalLink, Instagram, Mail, MapPin, MessageCircle, Phone, User } from "lucide-react";
 import type { Listing } from "@/lib/airtable";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
@@ -20,12 +20,12 @@ const ListingDetailDialog = ({ listing, open, onOpenChange }: ListingDetailDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-1rem)] sm:w-[calc(100vw-2rem)] max-w-4xl max-h-[90vh] p-0 overflow-hidden border-0 shadow-luxury-lg rounded-2xl bg-card flex flex-col">
+      <DialogContent className="max-w-3xl p-0 overflow-hidden border-0 shadow-luxury-lg rounded-2xl bg-card">
         <VisuallyHidden>
           <DialogTitle>{listing.businessName}</DialogTitle>
         </VisuallyHidden>
 
-        <div className="relative aspect-[16/10] md:aspect-[16/8] max-h-[260px] md:max-h-[320px] overflow-hidden bg-muted shrink-0">
+        <div className="relative aspect-[16/8] overflow-hidden bg-muted">
           {listing.businessPhoto ? (
             <img
               src={listing.businessPhoto}
@@ -57,7 +57,7 @@ const ListingDetailDialog = ({ listing, open, onOpenChange }: ListingDetailDialo
           )}
         </div>
 
-        <div className="p-5 md:p-8 space-y-6 overflow-y-auto">
+        <div className="p-8 space-y-6">
           <div>
             <h2 className="font-display text-3xl font-semibold text-foreground leading-tight">
               {listing.businessName}
@@ -83,22 +83,11 @@ const ListingDetailDialog = ({ listing, open, onOpenChange }: ListingDetailDialo
           )}
 
           <div className="grid gap-4 md:grid-cols-2">
-            <InfoBlock title="Category" value={listing.category} icon={<Tag className="h-4 w-4" />} />
-            <InfoBlock title="Location" value={listing.location} icon={<MapPin className="h-4 w-4" />} />
-            {listing.ownerName && <InfoBlock title="Owner Name" value={listing.ownerName} icon={<User className="h-4 w-4" />} />}
-            {listing.email && <InfoBlock title="Email" value={listing.email} icon={<Mail className="h-4 w-4" />} />}
-
             {listing.servicesOffered && (
               <InfoBlock title="Services Offered" value={listing.servicesOffered} />
             )}
             {listing.priceRange && (
               <InfoBlock title="Price Range" value={listing.priceRange} />
-            )}
-            {listing.website && (
-              <InfoBlock title="Website" value={listing.website} icon={<ExternalLink className="h-4 w-4" />} />
-            )}
-            {listing.instagram && (
-              <InfoBlock title="Instagram Handle" value={listing.instagram} icon={<Instagram className="h-4 w-4" />} />
             )}
             {listing.howToContact && (
               <InfoBlock title="How to Contact" value={listing.howToContact} icon={<MessageCircle className="h-4 w-4" />} />
@@ -142,9 +131,9 @@ const ListingDetailDialog = ({ listing, open, onOpenChange }: ListingDetailDialo
                 Other Social
               </a>
             )}
-            {listing.emailSelected && listing.email && (
+            {listing.emailSelected && listing.contactDetails && (
               <a
-                href={`mailto:${listing.email}`}
+                href={`mailto:${listing.contactDetails}`}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-border text-foreground text-sm font-sans font-medium hover:border-accent hover:text-accent transition-colors"
               >
                 <Mail className="h-4 w-4" />
