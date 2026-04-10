@@ -20,12 +20,12 @@ const ListingDetailDialog = ({ listing, open, onOpenChange }: ListingDetailDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl p-0 overflow-hidden border-0 shadow-luxury-lg rounded-2xl bg-card">
+      <DialogContent className="max-w-4xl p-0 overflow-hidden border border-border/70 shadow-luxury-lg rounded-3xl bg-card/95 backdrop-blur-xl">
         <VisuallyHidden>
           <DialogTitle>{listing.businessName}</DialogTitle>
         </VisuallyHidden>
 
-        <div className="relative aspect-[16/8] overflow-hidden bg-muted">
+        <div className="relative aspect-[16/7] overflow-hidden bg-muted">
           {listing.businessPhoto ? (
             <img
               src={listing.businessPhoto}
@@ -40,7 +40,7 @@ const ListingDetailDialog = ({ listing, open, onOpenChange }: ListingDetailDialo
             </div>
           )}
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-black/25" />
 
           <span className="absolute top-4 left-4 bg-primary/90 text-primary-foreground text-xs font-sans uppercase tracking-wider px-4 py-1.5 rounded-full backdrop-blur-sm">
             {listing.category}
@@ -156,7 +156,7 @@ const InfoBlock = ({
   value: string;
   icon?: React.ReactNode;
 }) => (
-  <div className="rounded-xl border border-border bg-secondary/50 px-4 py-3">
+  <div className="rounded-2xl border border-border/70 bg-secondary/40 px-4 py-3">
     <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground font-sans mb-1">{title}</p>
     <p className="text-sm text-foreground font-sans leading-relaxed inline-flex items-start gap-2">
       {icon ? <span className="text-accent mt-0.5">{icon}</span> : null}

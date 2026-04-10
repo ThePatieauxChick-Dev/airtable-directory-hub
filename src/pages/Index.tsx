@@ -7,7 +7,10 @@ import ListingCard from "@/components/ListingCard";
 import ListingDetailDialog from "@/components/ListingDetailDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, Menu, Sparkles, X } from "lucide-react";
+
+const normalizeLocation = (value: string) => value.toLowerCase().replace(/[^a-z0-9\s]/g, "").trim();
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,7 +31,11 @@ const Index = () => {
   const filtered = useMemo(() => {
     let result = listings;
     if (selectedCategory) result = result.filter((l) => l.category === selectedCategory);
-    if (selectedLocation) result = result.filter((l) => l.location === selectedLocation);
+    if (selectedLocation) {
+      const selected = normalizeLocation(selectedLocation);
+      result = result.filter((l) => normalizeLocation(l.location).includes(selected));
+    }
+
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
@@ -44,7 +51,7 @@ const Index = () => {
   }, [listings, selectedCategory, selectedLocation, searchQuery]);
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_hsl(var(--secondary))_0%,_hsl(var(--background))_45%)] flex">
       {sidebarOpen && (
         <div className="fixed inset-0 bg-foreground/40 backdrop-blur-sm z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
@@ -72,7 +79,7 @@ const Index = () => {
       </div>
 
       <div className="flex-1 flex flex-col min-h-screen">
-        <header className="sticky top-0 z-30 bg-background/85 backdrop-blur-md border-b border-border px-6 py-4 flex items-center justify-between">
+        <header className="sticky top-0 z-30 bg-background/70 backdrop-blur-xl border-b border-border px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button onClick={() => setSidebarOpen(!sidebarOpen)} className="lg:hidden p-2 rounded-md hover:bg-muted transition-colors">
               {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -86,7 +93,7 @@ const Index = () => {
               {desktopSidebarCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
             </button>
 
-            <div className="h-11 w-11 md:h-12 md:w-12 rounded-md border border-border bg-card p-1.5 shrink-0 overflow-hidden">
+            <div className="h-11 w-11 md:h-12 md:w-12 rounded-xl border border-border bg-card p-1.5 shrink-0 overflow-hidden shadow-luxury">
               <img src="/brand-logo.png" alt="The Patieaux Chick logo" className="h-full w-full object-contain" />
             </div>
             <div>
@@ -94,28 +101,33 @@ const Index = () => {
                 <span className="text-gradient-brand">Patio Business</span> Directory
               </h1>
               <p className="font-editorial text-sm text-muted-foreground italic hidden sm:block">
-                A trusted space to discover businesses with warmth, excellence, and intention.
+                Elevated vendors, curated for style, quality, and trust.
               </p>
             </div>
           </div>
-          <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground font-sans text-sm shadow-luxury">
+          <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground font-sans text-sm shadow-luxury rounded-full px-6">
             <Link to="/submit">Get Featured</Link>
           </Button>
         </header>
 
-        <main className="flex-1 px-6 py-8 max-w-[1400px] mx-auto w-full space-y-8">
-          <section className="rounded-2xl border border-border bg-gradient-to-r from-secondary to-secondary/60 p-6 md:p-8">
-            <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-accent font-sans mb-3">
+        <main className="flex-1 px-6 py-8 max-w-[1500px] mx-auto w-full space-y-8">
+          <section className="rounded-3xl border border-border/70 bg-gradient-to-r from-card/90 via-secondary/70 to-card/90 p-6 md:p-9 shadow-luxury-lg relative overflow-hidden">
+            <div className="absolute -top-24 -right-12 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
+            <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-accent font-sans mb-3 relative">
               <Sparkles className="h-3.5 w-3.5" />
               Curated Community
             </p>
-            <h2 className="font-display text-2xl md:text-3xl text-foreground">
-              More Than Outdoor Living—It’s a Lifestyle.
+            <h2 className="font-display text-2xl md:text-4xl text-foreground relative">
+              Modern, Interactive, Luxury Discovery—All in One Place.
             </h2>
-            <p className="font-editorial text-muted-foreground italic mt-2 max-w-3xl">
-              Heyyy Suga! Browse elevated, community-trusted businesses. Tap any card for the full story, services,
-              and direct contact details.
+            <p className="font-editorial text-muted-foreground italic mt-3 max-w-3xl relative">
+              Explore standout businesses with richer cards, immersive detail popups, and smarter filters built for how people really search by area.
             </p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              {selectedCategory && <Badge variant="secondary">{selectedCategory}</Badge>}
+              {selectedLocation && <Badge variant="secondary">{selectedLocation}</Badge>}
+              {!selectedCategory && !selectedLocation && <Badge variant="secondary">All Listings</Badge>}
+            </div>
           </section>
 
           {isLoading && (
@@ -154,7 +166,7 @@ const Index = () => {
           )}
         </main>
 
-        <footer className="border-t border-border py-8 text-center bg-secondary">
+        <footer className="border-t border-border py-8 text-center bg-secondary/80 backdrop-blur-sm">
           <p className="font-editorial text-sm text-secondary-foreground/70 italic">Curated with care by The Patieaux Chick · See you on the Patieaux.</p>
         </footer>
       </div>
