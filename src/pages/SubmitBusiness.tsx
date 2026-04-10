@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, ExternalLink, Send } from "lucide-react";
+import { ArrowLeft, ExternalLink, Loader2, Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const PAYMENT_LINK = "https://example.com/pay"; // TODO: Replace with actual payment link
+const STORAGE_BUCKET = "business-media";
 
 const CATEGORIES = [
   "Beauty & Wellness",
@@ -26,6 +27,8 @@ const CATEGORIES = [
 const SubmitBusiness = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [headshotFile, setHeadshotFile] = useState<File | null>(null);
+  const [businessPhotoFile, setBusinessPhotoFile] = useState<File | null>(null);
   const [form, setForm] = useState({
     ownerName: "",
     email: "",
@@ -47,6 +50,24 @@ const SubmitBusiness = () => {
 
   const update = (field: string, value: string | boolean) =>
     setForm((prev) => ({ ...prev, [field]: value }));
+
+  const uploadFile = async (file: File, pathPrefix: string): Promise<string | null> => {
+    const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const safePrefix = pathPrefix.replace(/[^a-z0-9-]/gi, "").toLowerCase() || "business";
+    const filePath = `${safePrefix}/${Date.now()}-${crypto.randomUUID()}.${extension}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(filePath, file, { upsert: false, cacheControl: "3600" });
+
+    if (uploadError) {
+      console.error(uploadError);
+      return null;
+    }
+
+    const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filePath);
+    return data.publicUrl;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,6 +161,7 @@ const SubmitBusiness = () => {
           <p className="text-sm text-muted-foreground font-sans">
             To complete your listing, please submit payment below.
           </p>
+          <p className="text-sm text-muted-foreground font-sans">To complete your listing, please submit payment below.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-luxury">
               <a href={PAYMENT_LINK} target="_blank" rel="noopener noreferrer">
@@ -161,10 +183,7 @@ const SubmitBusiness = () => {
       <header className="relative py-14 px-6 text-center border-b border-border overflow-hidden">
         <div className="absolute inset-0 bg-gradient-luxury opacity-[0.04]" />
         <div className="relative">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors font-sans mb-8"
-          >
+          <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors font-sans mb-8">
             <ArrowLeft className="h-4 w-4" />
             Back to Directory
           </Link>
@@ -212,9 +231,7 @@ const SubmitBusiness = () => {
                 <Select value={form.category} onValueChange={(v) => update("category", v)}>
                   <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
                   <SelectContent>
-                    {CATEGORIES.map((c) => (
-                      <SelectItem key={c} value={c}>{c}</SelectItem>
-                    ))}
+                    {CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </FormField>
@@ -276,12 +293,13 @@ const SubmitBusiness = () => {
             </div>
           </FormSection>
 
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full h-14 text-base font-sans bg-primary hover:bg-primary/90 text-primary-foreground shadow-luxury"
-          >
-            {isSubmitting ? "Submitting..." : (
+          <Button type="submit" disabled={isSubmitting} className="w-full h-14 text-base font-sans bg-primary hover:bg-primary/90 text-primary-foreground shadow-luxury">
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Submitting...
+              </>
+            ) : (
               <>
                 <Send className="h-4 w-4 mr-2" />
                 Submit Application
@@ -296,9 +314,7 @@ const SubmitBusiness = () => {
       </main>
 
       <footer className="border-t border-border py-8 text-center bg-secondary">
-        <p className="font-editorial text-sm text-secondary-foreground/70 italic">
-          Curated with care by The Patieaux Chick · See you on the Patieaux.
-        </p>
+        <p className="font-editorial text-sm text-secondary-foreground/70 italic">Curated with care by The Patieaux Chick · See you on the Patieaux.</p>
       </footer>
     </div>
   );

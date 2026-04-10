@@ -64,6 +64,13 @@ function extractAttachmentUrl(value: AirtableFieldValue): string | null {
   return null;
 }
 
+function pickField(fields: Record<string, AirtableFieldValue>, ...names: string[]): AirtableFieldValue {
+  for (const name of names) {
+    if (name in fields) return fields[name];
+  }
+  return undefined;
+}
+
 function parseRecord(record: unknown): Listing | null {
   if (!record || typeof record !== "object") return null;
 
@@ -75,7 +82,7 @@ function parseRecord(record: unknown): Listing | null {
 
   if (!id || !fields || typeof fields !== "object") return null;
 
-  const categoryValue = fields["Category"];
+  const categoryValue = pickField(fields, "Category", "category");
   const category = Array.isArray(categoryValue)
     ? asString(categoryValue[0] as AirtableFieldValue)
     : asString(categoryValue);

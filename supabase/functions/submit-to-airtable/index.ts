@@ -3,6 +3,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+type AirtableAttachmentInput = { url: string };
+type AirtableFieldValue = string | boolean | AirtableAttachmentInput[];
+
 function getRequiredEnv(name: string): string {
   const value = Deno.env.get(name);
   if (!value) {
