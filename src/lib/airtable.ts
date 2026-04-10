@@ -3,14 +3,20 @@ import { supabase } from "@/integrations/supabase/client";
 export interface Listing {
   id: string;
   businessName: string;
+  ownerName: string;
   businessPhoto: string | null;
   ownerHeadshot: string | null;
   category: string;
   location: string;
   description: string;
+  servicesOffered: string;
   priceRange: string;
   website: string | null;
   instagram: string | null;
+  otherSocialMedia: string | null;
+  howToContact: string | null;
+  contactDetails: string | null;
+  emailSelected: boolean;
 }
 
 type AirtableFieldValue = string | number | boolean | null | undefined | AirtableAttachment[] | string[];
@@ -33,6 +39,16 @@ function asString(value: AirtableFieldValue): string {
 function asStringOrNull(value: AirtableFieldValue): string | null {
   const parsed = asString(value).trim();
   return parsed.length ? parsed : null;
+}
+
+function asBoolean(value: AirtableFieldValue): boolean {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value !== 0;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    return normalized === "true" || normalized === "yes" || normalized === "1";
+  }
+  return false;
 }
 
 function extractAttachmentUrl(value: AirtableFieldValue): string | null {
@@ -67,14 +83,20 @@ function parseRecord(record: unknown): Listing | null {
   return {
     id,
     businessName: asString(fields["Business Name"]) || asString(fields["Name"]) || "Untitled",
+    ownerName: asString(fields["Owner Name"]),
     businessPhoto: extractAttachmentUrl(fields["Business Photo"]),
-    ownerHeadshot: extractAttachmentUrl(fields["Owner Headshot"]),
+    ownerHeadshot: extractAttachmentUrl(fields["Headshot"]) || extractAttachmentUrl(fields["Owner Headshot"]),
     category: category || "Uncategorized",
     location: asString(fields["Location"]) || "Unknown",
     description: asString(fields["Business Description"]) || asString(fields["Description"]) || "",
+    servicesOffered: asString(fields["Services Offered"]),
     priceRange: asString(fields["Price Range"]),
     website: asStringOrNull(fields["Website"]),
-    instagram: asStringOrNull(fields["Instagram"]) || asStringOrNull(fields["Instagram Handle"]),
+    instagram: asStringOrNull(fields["Instagram Handle"]) || asStringOrNull(fields["Instagram"]),
+    otherSocialMedia: asStringOrNull(fields["Other Social Media"]),
+    howToContact: asStringOrNull(fields["How to Contact"]),
+    contactDetails: asStringOrNull(fields["Contact Details"]),
+    emailSelected: asBoolean(fields["Email Selected"]),
   };
 }
 

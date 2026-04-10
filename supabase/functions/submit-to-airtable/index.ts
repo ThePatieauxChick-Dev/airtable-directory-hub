@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
 
-    if (!body.ownerName || !body.email || !body.businessName || !body.category || !body.location) {
+    if (!body.ownerName || !body.email || !body.businessName || !body.category || !body.location || !body.contactDetails) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -45,15 +45,24 @@ Deno.serve(async (req) => {
       );
     }
 
-    const fields: Record<string, string> = {
+    const fields: Record<string, string | boolean> = {
+      "Owner Name": String(body.ownerName).slice(0, 200),
       "Business Name": String(body.businessName).slice(0, 200),
+      "Category": String(body.category).slice(0, 100),
       "Location": String(body.location).slice(0, 200),
       "Business Description": String(body.description || "").slice(0, 2000),
+      "Contact Details": String(body.contactDetails).slice(0, 500),
+      "Email Selected": Boolean(body.emailSelected),
     };
 
+    if (body.headshot) fields["Headshot"] = String(body.headshot).slice(0, 1000);
+    if (body.businessPhoto) fields["Business Photo"] = String(body.businessPhoto).slice(0, 1000);
+    if (body.servicesOffered) fields["Services Offered"] = String(body.servicesOffered).slice(0, 2000);
     if (body.priceRange) fields["Price Range"] = String(body.priceRange).slice(0, 50);
     if (body.website) fields["Website"] = String(body.website).slice(0, 500);
-    if (body.instagram) fields["Instagram"] = String(body.instagram).slice(0, 100);
+    if (body.instagram) fields["Instagram Handle"] = String(body.instagram).slice(0, 100);
+    if (body.otherSocialMedia) fields["Other Social Media"] = String(body.otherSocialMedia).slice(0, 500);
+    if (body.howToContact) fields["How to Contact"] = String(body.howToContact).slice(0, 100);
 
     const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_ID}`;
     const response = await fetch(url, {

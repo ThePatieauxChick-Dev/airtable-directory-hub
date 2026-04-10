@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { ExternalLink, Instagram, MapPin, X } from "lucide-react";
+import { ExternalLink, Instagram, Mail, MapPin, MessageCircle, Phone, User } from "lucide-react";
 import type { Listing } from "@/lib/airtable";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
@@ -20,13 +20,12 @@ const ListingDetailDialog = ({ listing, open, onOpenChange }: ListingDetailDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0 overflow-hidden border-0 shadow-luxury-lg rounded-xl bg-card">
+      <DialogContent className="max-w-3xl p-0 overflow-hidden border-0 shadow-luxury-lg rounded-2xl bg-card">
         <VisuallyHidden>
           <DialogTitle>{listing.businessName}</DialogTitle>
         </VisuallyHidden>
 
-        {/* Hero image */}
-        <div className="relative aspect-[16/9] overflow-hidden bg-muted">
+        <div className="relative aspect-[16/8] overflow-hidden bg-muted">
           {listing.businessPhoto ? (
             <img
               src={listing.businessPhoto}
@@ -41,12 +40,12 @@ const ListingDetailDialog = ({ listing, open, onOpenChange }: ListingDetailDialo
             </div>
           )}
 
-          {/* Category badge */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/20" />
+
           <span className="absolute top-4 left-4 bg-primary/90 text-primary-foreground text-xs font-sans uppercase tracking-wider px-4 py-1.5 rounded-full backdrop-blur-sm">
             {listing.category}
           </span>
 
-          {/* Owner headshot */}
           {listing.ownerHeadshot && (
             <div className="absolute bottom-4 right-4 w-16 h-16 rounded-full border-[3px] border-card overflow-hidden shadow-luxury">
               <img
@@ -58,15 +57,22 @@ const ListingDetailDialog = ({ listing, open, onOpenChange }: ListingDetailDialo
           )}
         </div>
 
-        {/* Content */}
-        <div className="p-8 space-y-5">
+        <div className="p-8 space-y-6">
           <div>
             <h2 className="font-display text-3xl font-semibold text-foreground leading-tight">
               {listing.businessName}
             </h2>
-            <div className="flex items-center gap-2 mt-2">
-              <MapPin className="h-4 w-4 text-accent" />
-              <span className="text-sm text-muted-foreground font-sans">{listing.location}</span>
+            <div className="flex flex-wrap items-center gap-4 mt-3">
+              <span className="inline-flex items-center gap-2 text-sm text-muted-foreground font-sans">
+                <MapPin className="h-4 w-4 text-accent" />
+                {listing.location}
+              </span>
+              {listing.ownerName && (
+                <span className="inline-flex items-center gap-2 text-sm text-muted-foreground font-sans">
+                  <User className="h-4 w-4 text-accent" />
+                  {listing.ownerName}
+                </span>
+              )}
             </div>
           </div>
 
@@ -76,16 +82,22 @@ const ListingDetailDialog = ({ listing, open, onOpenChange }: ListingDetailDialo
             </p>
           )}
 
-          {listing.priceRange && (
-            <div className="inline-flex items-center gap-2 bg-muted px-4 py-2 rounded-full">
-              <span className="text-sm font-sans text-accent font-semibold tracking-wide">
-                {listing.priceRange}
-              </span>
-            </div>
-          )}
+          <div className="grid gap-4 md:grid-cols-2">
+            {listing.servicesOffered && (
+              <InfoBlock title="Services Offered" value={listing.servicesOffered} />
+            )}
+            {listing.priceRange && (
+              <InfoBlock title="Price Range" value={listing.priceRange} />
+            )}
+            {listing.howToContact && (
+              <InfoBlock title="How to Contact" value={listing.howToContact} icon={<MessageCircle className="h-4 w-4" />} />
+            )}
+            {listing.contactDetails && (
+              <InfoBlock title="Contact Details" value={listing.contactDetails} icon={<Phone className="h-4 w-4" />} />
+            )}
+          </div>
 
-          {/* Links */}
-          <div className="flex items-center gap-4 pt-4 border-t border-border">
+          <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-border">
             {listing.website && (
               <a
                 href={listing.website.startsWith("http") ? listing.website : `https://${listing.website}`}
@@ -108,11 +120,49 @@ const ListingDetailDialog = ({ listing, open, onOpenChange }: ListingDetailDialo
                 Instagram
               </a>
             )}
+            {listing.otherSocialMedia && (
+              <a
+                href={listing.otherSocialMedia.startsWith("http") ? listing.otherSocialMedia : `https://${listing.otherSocialMedia}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-border text-foreground text-sm font-sans font-medium hover:border-accent hover:text-accent transition-colors"
+              >
+                <ExternalLink className="h-4 w-4" />
+                Other Social
+              </a>
+            )}
+            {listing.emailSelected && listing.contactDetails && (
+              <a
+                href={`mailto:${listing.contactDetails}`}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-border text-foreground text-sm font-sans font-medium hover:border-accent hover:text-accent transition-colors"
+              >
+                <Mail className="h-4 w-4" />
+                Email
+              </a>
+            )}
           </div>
         </div>
       </DialogContent>
     </Dialog>
   );
 };
+
+const InfoBlock = ({
+  title,
+  value,
+  icon,
+}: {
+  title: string;
+  value: string;
+  icon?: React.ReactNode;
+}) => (
+  <div className="rounded-xl border border-border bg-secondary/50 px-4 py-3">
+    <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground font-sans mb-1">{title}</p>
+    <p className="text-sm text-foreground font-sans leading-relaxed inline-flex items-start gap-2">
+      {icon ? <span className="text-accent mt-0.5">{icon}</span> : null}
+      <span>{value}</span>
+    </p>
+  </div>
+);
 
 export default ListingDetailDialog;

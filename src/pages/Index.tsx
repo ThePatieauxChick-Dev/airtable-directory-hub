@@ -7,7 +7,7 @@ import ListingCard from "@/components/ListingCard";
 import ListingDetailDialog from "@/components/ListingDetailDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, Sparkles, X } from "lucide-react";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,7 +42,8 @@ const Index = () => {
           l.businessName.toLowerCase().includes(q) ||
           l.category.toLowerCase().includes(q) ||
           l.location.toLowerCase().includes(q) ||
-          l.description.toLowerCase().includes(q)
+          l.description.toLowerCase().includes(q) ||
+          l.servicesOffered.toLowerCase().includes(q)
       );
     }
     return result;
@@ -50,7 +51,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-foreground/40 backdrop-blur-sm z-40 lg:hidden"
@@ -58,7 +58,6 @@ const Index = () => {
         />
       )}
 
-      {/* Sidebar */}
       <div
         className={`fixed lg:relative z-50 lg:z-auto transition-transform duration-300 lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -71,16 +70,20 @@ const Index = () => {
           locations={locations}
           selectedCategory={selectedCategory}
           selectedLocation={selectedLocation}
-          onCategoryChange={(v) => { setSelectedCategory(v); setSidebarOpen(false); }}
-          onLocationChange={(v) => { setSelectedLocation(v); setSidebarOpen(false); }}
+          onCategoryChange={(v) => {
+            setSelectedCategory(v);
+            setSidebarOpen(false);
+          }}
+          onLocationChange={(v) => {
+            setSelectedLocation(v);
+            setSidebarOpen(false);
+          }}
           totalListings={filtered.length}
         />
       </div>
 
-      {/* Main content */}
       <div className="flex-1 flex flex-col min-h-screen">
-        {/* Top header bar */}
-        <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border px-6 py-4 flex items-center justify-between">
+        <header className="sticky top-0 z-30 bg-background/85 backdrop-blur-md border-b border-border px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -90,10 +93,10 @@ const Index = () => {
             </button>
             <div>
               <h1 className="font-display text-2xl md:text-3xl font-semibold text-foreground">
-                <span className="text-gradient-brand">Patio Guide</span> Directory
+                <span className="text-gradient-brand">The Patieaux Chick</span> Directory
               </h1>
               <p className="font-editorial text-sm text-muted-foreground italic hidden sm:block">
-                Curated businesses we trust, love, and proudly recommend.
+                A trusted space to discover businesses with warmth, excellence, and intention.
               </p>
             </div>
           </div>
@@ -102,8 +105,21 @@ const Index = () => {
           </Button>
         </header>
 
-        {/* Grid content */}
-        <main className="flex-1 px-6 py-8 max-w-[1400px] mx-auto w-full">
+        <main className="flex-1 px-6 py-8 max-w-[1400px] mx-auto w-full space-y-8">
+          <section className="rounded-2xl border border-border bg-gradient-to-r from-secondary to-secondary/60 p-6 md:p-8">
+            <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-accent font-sans mb-3">
+              <Sparkles className="h-3.5 w-3.5" />
+              Curated Community
+            </p>
+            <h2 className="font-display text-2xl md:text-3xl text-foreground">
+              More Than Outdoor Living—It’s a Lifestyle.
+            </h2>
+            <p className="font-editorial text-muted-foreground italic mt-2 max-w-3xl">
+              Heyyy Suga! Browse elevated, community-trusted businesses. Tap any card for the full story, services,
+              and direct contact details.
+            </p>
+          </section>
+
           {isLoading && (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
@@ -119,7 +135,7 @@ const Index = () => {
           {error && (
             <div className="text-center py-20">
               <p className="font-editorial text-lg text-muted-foreground italic">
-                We couldn't load the directory right now. Please try again shortly.
+                We couldn&apos;t load the directory right now. Please try again shortly.
               </p>
             </div>
           )}
@@ -147,7 +163,6 @@ const Index = () => {
           )}
         </main>
 
-        {/* Footer */}
         <footer className="border-t border-border py-8 text-center bg-secondary">
           <p className="font-editorial text-sm text-secondary-foreground/70 italic">
             Curated with care by The Patieaux Chick · See you on the Patieaux.
@@ -155,7 +170,6 @@ const Index = () => {
         </footer>
       </div>
 
-      {/* Listing detail overlay */}
       <ListingDetailDialog
         listing={selectedListing}
         open={!!selectedListing}

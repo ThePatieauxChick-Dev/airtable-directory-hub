@@ -1,4 +1,4 @@
-import { ExternalLink, Instagram, MapPin } from "lucide-react";
+import { ArrowUpRight, ExternalLink, Instagram, MapPin } from "lucide-react";
 import type { Listing } from "@/lib/airtable";
 import { useCardView, useTrackClick } from "@/hooks/use-listing-analytics";
 
@@ -22,11 +22,10 @@ const ListingCard = ({ listing, index, onClick }: ListingCardProps) => {
   return (
     <article
       ref={cardRef as React.RefObject<HTMLElement>}
-      className="group bg-card rounded-xl overflow-hidden border border-border shadow-luxury hover:shadow-luxury-lg transition-all duration-500 opacity-0 animate-fade-in cursor-pointer"
+      className="group bg-card rounded-2xl overflow-hidden border border-border/70 shadow-luxury hover:shadow-luxury-lg hover:-translate-y-1 transition-all duration-500 opacity-0 animate-fade-in cursor-pointer"
       style={{ animationDelay: `${index * 80}ms` }}
       onClick={onClick}
     >
-      {/* Business Photo */}
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         {listing.businessPhoto ? (
           <img
@@ -43,12 +42,12 @@ const ListingCard = ({ listing, index, onClick }: ListingCardProps) => {
           </div>
         )}
 
-        {/* Category badge */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/0 to-black/10" />
+
         <span className="absolute top-3 left-3 bg-primary/90 text-primary-foreground text-[10px] font-sans uppercase tracking-[0.15em] px-3 py-1 rounded-full backdrop-blur-sm">
           {listing.category}
         </span>
 
-        {/* Owner headshot */}
         {listing.ownerHeadshot && (
           <div className="absolute bottom-3 right-3 w-11 h-11 rounded-full border-2 border-card overflow-hidden shadow-luxury">
             <img
@@ -61,13 +60,17 @@ const ListingCard = ({ listing, index, onClick }: ListingCardProps) => {
         )}
       </div>
 
-      {/* Card body */}
-      <div className="p-5 space-y-2.5">
+      <div className="p-5 space-y-3">
         <div>
-          <h3 className="font-display text-lg font-semibold text-foreground leading-tight group-hover:text-accent transition-colors">
+          <h3 className="font-display text-xl font-semibold text-foreground leading-tight group-hover:text-accent transition-colors">
             {listing.businessName}
           </h3>
-          <div className="flex items-center gap-1.5 mt-1.5">
+          {listing.ownerName && (
+            <p className="text-xs font-sans uppercase tracking-[0.12em] text-muted-foreground mt-1">
+              Owned by {listing.ownerName}
+            </p>
+          )}
+          <div className="flex items-center gap-1.5 mt-2">
             <MapPin className="h-3 w-3 text-accent" />
             <span className="text-xs text-muted-foreground font-sans">{listing.location}</span>
           </div>
@@ -79,13 +82,18 @@ const ListingCard = ({ listing, index, onClick }: ListingCardProps) => {
           </p>
         )}
 
-        {listing.priceRange && (
-          <p className="text-xs font-sans text-accent font-semibold tracking-wide">
-            {listing.priceRange}
-          </p>
-        )}
+        <div className="flex items-center justify-between">
+          {listing.priceRange ? (
+            <p className="text-xs font-sans text-accent font-semibold tracking-wide">
+              {listing.priceRange}
+            </p>
+          ) : <span />}
+          <span className="inline-flex items-center gap-1 text-xs font-sans text-foreground/70 group-hover:text-accent transition-colors">
+            Full details
+            <ArrowUpRight className="h-3 w-3" />
+          </span>
+        </div>
 
-        {/* Links */}
         <div className="flex items-center gap-3 pt-2 border-t border-border">
           {listing.website && (
             <a
