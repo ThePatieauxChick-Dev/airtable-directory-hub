@@ -33,6 +33,18 @@ type AirtableRecord = {
 function asString(value: AirtableFieldValue): string {
   if (typeof value === "string") return value;
   if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => {
+        if (typeof item === "string") return item;
+        if (item && typeof item === "object" && "url" in item && typeof item.url === "string") {
+          return item.url;
+        }
+        return "";
+      })
+      .filter((item) => item.trim().length > 0)
+      .join(", ");
+  }
   return "";
 }
 
@@ -65,8 +77,15 @@ function extractAttachmentUrl(value: AirtableFieldValue): string | null {
 }
 
 function pickField(fields: Record<string, AirtableFieldValue>, ...names: string[]): AirtableFieldValue {
+  const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const normalizedFieldEntries = Object.entries(fields).map(([key, value]) => [normalize(key), value] as const);
+
   for (const name of names) {
     if (name in fields) return fields[name];
+
+    const normalizedName = normalize(name);
+    const matchedEntry = normalizedFieldEntries.find(([normalizedKey]) => normalizedKey === normalizedName);
+    if (matchedEntry) return matchedEntry[1];
   }
   return undefined;
 }
@@ -89,21 +108,21 @@ function parseRecord(record: unknown): Listing | null {
 
   return {
     id,
-    businessName: asString(fields["Business Name"]) || asString(fields["Name"]) || "Untitled",
-    ownerName: asString(fields["Owner Name"]),
-    businessPhoto: extractAttachmentUrl(fields["Business Photo"]),
-    ownerHeadshot: extractAttachmentUrl(fields["Headshot"]) || extractAttachmentUrl(fields["Owner Headshot"]),
+    businessName: asString(pickField(fields, "Business Name", "Name")) || "Untitled",
+    ownerName: asString(pickField(fields, "Owner Name")),
+    businessPhoto: extractAttachmentUrl(pickField(fields, "Business Photo")),
+    ownerHeadshot: extractAttachmentUrl(pickField(fields, "Headshot", "Owner Headshot")),
     category: category || "Uncategorized",
-    location: asString(fields["Location"]) || "Unknown",
-    description: asString(fields["Business Description"]) || asString(fields["Description"]) || "",
-    servicesOffered: asString(fields["Services Offered"]),
-    priceRange: asString(fields["Price Range"]),
-    website: asStringOrNull(fields["Website"]),
-    instagram: asStringOrNull(fields["Instagram Handle"]) || asStringOrNull(fields["Instagram"]),
-    otherSocialMedia: asStringOrNull(fields["Other Social Media"]),
-    howToContact: asStringOrNull(fields["How to Contact"]),
-    contactDetails: asStringOrNull(fields["Contact Details"]),
-    emailSelected: asBoolean(fields["Email Selected"]),
+    location: asString(pickField(fields, "Location")) || "Unknown",
+    description: asString(pickField(fields, "Business Description", "Description")) || "",
+    servicesOffered: asString(pickField(fields, "Services Offered")),
+    priceRange: asString(pickField(fields, "Price Range")),
+    website: asStringOrNull(pickField(fields, "Website")),
+    instagram: asStringOrNull(pickField(fields, "Instagram Handle", "Instagram")),
+    otherSocialMedia: asStringOrNull(pickField(fields, "Other Social Media")),
+    howToContact: asStringOrNull(pickField(fields, "How to Contact")),
+    contactDetails: asStringOrNull(pickField(fields, "Contact Details")),
+    emailSelected: asBoolean(pickField(fields, "Email Selected")),
   };
 }
 
