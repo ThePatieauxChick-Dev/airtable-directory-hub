@@ -5,9 +5,10 @@ import { useCardView, useTrackClick } from "@/hooks/use-listing-analytics";
 interface ListingCardProps {
   listing: Listing;
   index: number;
+  onClick: () => void;
 }
 
-const ListingCard = ({ listing, index }: ListingCardProps) => {
+const ListingCard = ({ listing, index, onClick }: ListingCardProps) => {
   const cardRef = useCardView(listing.id, listing.businessName);
   const trackWebsite = useTrackClick(listing.id, listing.businessName, "website_click");
   const trackInstagram = useTrackClick(listing.id, listing.businessName, "instagram_click");
@@ -21,8 +22,9 @@ const ListingCard = ({ listing, index }: ListingCardProps) => {
   return (
     <article
       ref={cardRef as React.RefObject<HTMLElement>}
-      className="group bg-card rounded-lg overflow-hidden border border-border shadow-sm hover:shadow-md transition-all duration-300 opacity-0 animate-fade-in"
+      className="group bg-card rounded-xl overflow-hidden border border-border shadow-luxury hover:shadow-luxury-lg transition-all duration-500 opacity-0 animate-fade-in cursor-pointer"
       style={{ animationDelay: `${index * 80}ms` }}
+      onClick={onClick}
     >
       {/* Business Photo */}
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
@@ -30,25 +32,25 @@ const ListingCard = ({ listing, index }: ListingCardProps) => {
           <img
             src={listing.businessPhoto}
             alt={listing.businessName}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
             loading="lazy"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="font-display text-3xl text-muted-foreground/30">
+          <div className="w-full h-full bg-gradient-luxury flex items-center justify-center">
+            <span className="font-display text-4xl text-primary-foreground/30">
               {listing.businessName.charAt(0)}
             </span>
           </div>
         )}
 
         {/* Category badge */}
-        <span className="absolute top-3 left-3 bg-primary/90 text-primary-foreground text-xs font-sans uppercase tracking-wider px-3 py-1 rounded-full backdrop-blur-sm">
+        <span className="absolute top-3 left-3 bg-primary/90 text-primary-foreground text-[10px] font-sans uppercase tracking-[0.15em] px-3 py-1 rounded-full backdrop-blur-sm">
           {listing.category}
         </span>
 
         {/* Owner headshot */}
         {listing.ownerHeadshot && (
-          <div className="absolute bottom-3 right-3 w-12 h-12 rounded-full border-2 border-card overflow-hidden shadow-md">
+          <div className="absolute bottom-3 right-3 w-11 h-11 rounded-full border-2 border-card overflow-hidden shadow-luxury">
             <img
               src={listing.ownerHeadshot}
               alt={`Owner of ${listing.businessName}`}
@@ -60,25 +62,25 @@ const ListingCard = ({ listing, index }: ListingCardProps) => {
       </div>
 
       {/* Card body */}
-      <div className="p-5 space-y-3">
+      <div className="p-5 space-y-2.5">
         <div>
-          <h3 className="font-display text-xl font-semibold text-foreground leading-tight">
+          <h3 className="font-display text-lg font-semibold text-foreground leading-tight group-hover:text-accent transition-colors">
             {listing.businessName}
           </h3>
           <div className="flex items-center gap-1.5 mt-1.5">
-            <MapPin className="h-3.5 w-3.5 text-accent" />
-            <span className="text-sm text-muted-foreground font-sans">{listing.location}</span>
+            <MapPin className="h-3 w-3 text-accent" />
+            <span className="text-xs text-muted-foreground font-sans">{listing.location}</span>
           </div>
         </div>
 
         {listing.description && (
-          <p className="text-sm text-muted-foreground font-editorial leading-relaxed line-clamp-3">
+          <p className="text-sm text-muted-foreground font-editorial leading-relaxed line-clamp-2 italic">
             {listing.description}
           </p>
         )}
 
         {listing.priceRange && (
-          <p className="text-sm font-sans text-accent font-medium tracking-wide">
+          <p className="text-xs font-sans text-accent font-semibold tracking-wide">
             {listing.priceRange}
           </p>
         )}
@@ -90,10 +92,10 @@ const ListingCard = ({ listing, index }: ListingCardProps) => {
               href={listing.website.startsWith("http") ? listing.website : `https://${listing.website}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm font-sans text-foreground hover:text-accent transition-colors"
-              onClick={trackWebsite}
+              className="inline-flex items-center gap-1.5 text-xs font-sans text-foreground/70 hover:text-accent transition-colors"
+              onClick={(e) => { e.stopPropagation(); trackWebsite(); }}
             >
-              <ExternalLink className="h-3.5 w-3.5" />
+              <ExternalLink className="h-3 w-3" />
               Website
             </a>
           )}
@@ -102,10 +104,10 @@ const ListingCard = ({ listing, index }: ListingCardProps) => {
               href={instagramUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm font-sans text-foreground hover:text-accent transition-colors"
-              onClick={trackInstagram}
+              className="inline-flex items-center gap-1.5 text-xs font-sans text-foreground/70 hover:text-accent transition-colors"
+              onClick={(e) => { e.stopPropagation(); trackInstagram(); }}
             >
-              <Instagram className="h-3.5 w-3.5" />
+              <Instagram className="h-3 w-3" />
               Instagram
             </a>
           )}
