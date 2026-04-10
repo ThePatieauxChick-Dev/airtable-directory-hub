@@ -17,49 +17,70 @@ export type Database = {
       business_submissions: {
         Row: {
           business_name: string
+          business_photo: string | null
           category: string
+          contact_details: string | null
           created_at: string
           description: string
           email: string
+          email_selected: boolean
+          how_to_contact: string | null
           id: string
           instagram: string | null
           location: string
+          other_social_media: string | null
+          owner_headshot: string | null
           owner_name: string
           phone: string | null
           price_range: string | null
           reason: string | null
+          services_offered: string | null
           status: string
           website: string | null
         }
         Insert: {
           business_name: string
+          business_photo?: string | null
           category: string
+          contact_details?: string | null
           created_at?: string
           description?: string
           email: string
+          email_selected?: boolean
+          how_to_contact?: string | null
           id?: string
           instagram?: string | null
           location: string
+          other_social_media?: string | null
+          owner_headshot?: string | null
           owner_name: string
           phone?: string | null
           price_range?: string | null
           reason?: string | null
+          services_offered?: string | null
           status?: string
           website?: string | null
         }
         Update: {
           business_name?: string
+          business_photo?: string | null
           category?: string
+          contact_details?: string | null
           created_at?: string
           description?: string
           email?: string
+          email_selected?: boolean
+          how_to_contact?: string | null
           id?: string
           instagram?: string | null
           location?: string
+          other_social_media?: string | null
+          owner_headshot?: string | null
           owner_name?: string
           phone?: string | null
           price_range?: string | null
           reason?: string | null
+          services_offered?: string | null
           status?: string
           website?: string | null
         }
