@@ -1,12 +1,22 @@
 import { useState, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ArrowLeft, Upload } from "lucide-react";
 
-const CATEGORIES = [
+const BUSINESS_CATEGORIES = [
   "Food & Beverage (Curated Brands Only)",
   "Outdoor Living & Patio Design",
   "Wellness, Beauty & Self-Care",
   "Other (Subject to Approval)",
+];
+
+const PERSONAL_CATEGORIES = [
+  "Wellness",
+  "Service Provider",
+  "Business Owner",
+  "Creative",
+  "Travel",
+  "Lifestyle",
+  "Other",
 ];
 
 const COUNTRIES = [
@@ -39,13 +49,14 @@ interface FormState {
   whatOffer: string;
   website: string;
   socialMedia: string;
-  finalCategory: string;
+  personalCategory: string;
   ack1: boolean;
   ack2: boolean;
+  ack3: boolean;
+  ack4: boolean;
 }
 
 const SubmitBusiness = () => {
-  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -64,9 +75,11 @@ const SubmitBusiness = () => {
     whatOffer: "",
     website: "",
     socialMedia: "",
-    finalCategory: "",
+    personalCategory: "",
     ack1: false,
     ack2: false,
+    ack3: false,
+    ack4: false,
   });
 
   function set(field: keyof FormState, value: string | boolean | File | null) {
@@ -89,37 +102,60 @@ const SubmitBusiness = () => {
     e.preventDefault();
     setError(null);
 
-    const category = form.finalCategory || form.businessCategory;
-
-    if (!form.fullName || !form.email || !form.cityAndState || !form.country || !form.businessName || !category) {
-      setError("Please fill in all required fields.");
+    if (!form.fullName.trim()) {
+      setError("Please enter your full name.");
       return;
     }
-    if (!form.shortBio) {
+    if (!form.email.trim()) {
+      setError("Please enter your email address.");
+      return;
+    }
+    if (!form.cityAndState.trim()) {
+      setError("Please enter your city and state.");
+      return;
+    }
+    if (!form.country) {
+      setError("Please select your country.");
+      return;
+    }
+    if (!form.shortBio.trim()) {
       setError("Please provide your short bio.");
       return;
     }
-    if (!form.whatOffer) {
+    if (!form.businessCategory) {
+      setError("Please select the category that best fits your business.");
+      return;
+    }
+    if (!form.businessName.trim()) {
+      setError("Please enter your business name.");
+      return;
+    }
+    if (!form.whatOffer.trim()) {
       setError("Please describe what you offer.");
       return;
     }
-    if (!form.ack1 || !form.ack2) {
-      setError("Please check both acknowledgement boxes to continue.");
+    if (!form.personalCategory) {
+      setError("Please select the category that best represents you.");
+      return;
+    }
+    if (!form.ack1 || !form.ack2 || !form.ack3 || !form.ack4) {
+      setError("Please check all four acknowledgement boxes to continue.");
       return;
     }
 
     setSubmitting(true);
     try {
       const formData = new FormData();
-      formData.append("fullName", form.fullName);
-      formData.append("email", form.email);
-      formData.append("cityAndState", form.cityAndState);
+      formData.append("fullName", form.fullName.trim());
+      formData.append("email", form.email.trim());
+      formData.append("cityAndState", form.cityAndState.trim());
       formData.append("country", form.country);
-      formData.append("businessName", form.businessName);
-      formData.append("category", category);
+      formData.append("businessName", form.businessName.trim());
+      formData.append("category", form.businessCategory);
+      formData.append("personalCategory", form.personalCategory);
       if (form.phone) formData.append("phone", form.phone);
-      if (form.shortBio) formData.append("shortBio", form.shortBio);
-      if (form.whatOffer) formData.append("whatOffer", form.whatOffer);
+      if (form.shortBio) formData.append("shortBio", form.shortBio.trim());
+      if (form.whatOffer) formData.append("whatOffer", form.whatOffer.trim());
       if (form.website) formData.append("website", form.website);
       if (form.socialMedia) formData.append("socialMedia", form.socialMedia);
       if (form.photo) formData.append("photo", form.photo, form.photo.name);
@@ -188,7 +224,6 @@ const SubmitBusiness = () => {
                 value={form.fullName}
                 onChange={(e) => set("fullName", e.target.value)}
                 className={inputClass}
-                required
               />
             </div>
 
@@ -215,7 +250,6 @@ const SubmitBusiness = () => {
                 value={form.email}
                 onChange={(e) => set("email", e.target.value)}
                 className={inputClass}
-                required
               />
             </div>
 
@@ -227,10 +261,10 @@ const SubmitBusiness = () => {
               <input
                 data-testid="input-cityAndState"
                 type="text"
+                placeholder="e.g. Atlanta, GA"
                 value={form.cityAndState}
                 onChange={(e) => set("cityAndState", e.target.value)}
                 className={inputClass}
-                required
               />
             </div>
 
@@ -243,15 +277,10 @@ const SubmitBusiness = () => {
                 value={form.country}
                 onChange={(e) => set("country", e.target.value)}
                 className={inputClass}
-                required
               >
-                <option value="" disabled>
-                  Country
-                </option>
+                <option value="" disabled>Select your country…</option>
                 {COUNTRIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
+                  <option key={c} value={c}>{c}</option>
                 ))}
               </select>
             </div>
@@ -265,9 +294,7 @@ const SubmitBusiness = () => {
 
             {/* Photo Upload */}
             <div>
-              <label className={labelClass}>
-                Upload Your Photo <span className="text-red-600">*</span>
-              </label>
+              <label className={labelClass}>Upload Your Photo</label>
               <div
                 onClick={() => fileInputRef.current?.click()}
                 className="w-full border border-[#c8a882] rounded bg-white/80 flex items-center justify-center cursor-pointer hover:bg-white transition-colors"
@@ -283,6 +310,7 @@ const SubmitBusiness = () => {
                 ) : (
                   <div className="flex flex-col items-center gap-2 py-6 text-[#9a7558]">
                     <Upload className="h-8 w-8" />
+                    <span className="text-xs">Click to upload a photo</span>
                   </div>
                 )}
               </div>
@@ -311,11 +339,10 @@ const SubmitBusiness = () => {
                 value={form.shortBio}
                 onChange={(e) => set("shortBio", e.target.value)}
                 className={inputClass + " resize-y"}
-                required
               />
             </div>
 
-            {/* Category (first) */}
+            {/* Business Category (first) */}
             <div>
               <label className={labelClass}>
                 Select the category that best fits your business:{" "}
@@ -327,11 +354,9 @@ const SubmitBusiness = () => {
                 onChange={(e) => set("businessCategory", e.target.value)}
                 className={inputClass}
               >
-                <option value="" disabled></option>
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
+                <option value="" disabled>Select a category…</option>
+                {BUSINESS_CATEGORIES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
                 ))}
               </select>
             </div>
@@ -351,7 +376,7 @@ const SubmitBusiness = () => {
             </p>
           </div>
 
-          {/* ── Business Name, Offer, Links, Final Category ── */}
+          {/* ── Business Name, Offer, Links, Personal Category ── */}
           <section className="space-y-4">
             <div>
               <label className={labelClass}>
@@ -360,10 +385,10 @@ const SubmitBusiness = () => {
               <input
                 data-testid="input-businessName"
                 type="text"
+                placeholder="Your business name"
                 value={form.businessName}
                 onChange={(e) => set("businessName", e.target.value)}
                 className={inputClass}
-                required
               />
             </div>
 
@@ -374,14 +399,11 @@ const SubmitBusiness = () => {
               <textarea
                 data-testid="textarea-whatOffer"
                 rows={3}
+                placeholder="Briefly describe your product, service, or offering."
                 value={form.whatOffer}
                 onChange={(e) => set("whatOffer", e.target.value)}
                 className={inputClass + " resize-y"}
-                required
               />
-              <p className="text-xs text-[#7a5a3a] mt-1">
-                Briefly describe your product, service, or offering.
-              </p>
             </div>
 
             <div>
@@ -389,7 +411,7 @@ const SubmitBusiness = () => {
               <input
                 data-testid="input-website"
                 type="url"
-                placeholder="Web URL goes here"
+                placeholder="https://yourwebsite.com"
                 value={form.website}
                 onChange={(e) => set("website", e.target.value)}
                 className={inputClass}
@@ -403,6 +425,7 @@ const SubmitBusiness = () => {
               <input
                 data-testid="input-socialMedia"
                 type="text"
+                placeholder="https://instagram.com/yourhandle"
                 value={form.socialMedia}
                 onChange={(e) => set("socialMedia", e.target.value)}
                 className={inputClass}
@@ -415,16 +438,14 @@ const SubmitBusiness = () => {
                 <span className="text-red-600">*</span>
               </label>
               <select
-                data-testid="select-finalCategory"
-                value={form.finalCategory}
-                onChange={(e) => set("finalCategory", e.target.value)}
+                data-testid="select-personalCategory"
+                value={form.personalCategory}
+                onChange={(e) => set("personalCategory", e.target.value)}
                 className={inputClass}
               >
-                <option value="" disabled></option>
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
+                <option value="" disabled>Select a category…</option>
+                {PERSONAL_CATEGORIES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
                 ))}
               </select>
             </div>
@@ -436,7 +457,6 @@ const SubmitBusiness = () => {
               Acknowledgement
             </h2>
 
-            {/* Ack 1 */}
             <label className="flex items-start gap-3 cursor-pointer" data-testid="ack-1">
               <input
                 type="checkbox"
@@ -444,19 +464,12 @@ const SubmitBusiness = () => {
                 onChange={(e) => set("ack1", e.target.checked)}
                 className="mt-1 h-4 w-4 shrink-0 accent-[#8b5e3c] cursor-pointer"
               />
-              <ul className="text-sm text-[#3a2a1a] list-disc list-outside ml-3 space-y-1">
-                <li>
-                  I confirm that my submission aligns with the categories provided or has been submitted under
-                  "Other" for review.
-                </li>
-                <li>
-                  I understand that all entries are reviewed and may be declined if they do not align with The
-                  Patieaux Chick's brand or community standards.
-                </li>
-              </ul>
+              <span className="text-sm text-[#3a2a1a]">
+                I confirm that my submission aligns with the categories provided or has been submitted under
+                "Other" for review.
+              </span>
             </label>
 
-            {/* Ack 2 */}
             <label className="flex items-start gap-3 cursor-pointer" data-testid="ack-2">
               <input
                 type="checkbox"
@@ -464,16 +477,36 @@ const SubmitBusiness = () => {
                 onChange={(e) => set("ack2", e.target.checked)}
                 className="mt-1 h-4 w-4 shrink-0 accent-[#8b5e3c] cursor-pointer"
               />
-              <ul className="text-sm text-[#3a2a1a] list-disc list-outside ml-3 space-y-1">
-                <li>
-                  To maintain the integrity of The Patieaux Business Guide, all submissions are reviewed before
-                  approval. Listing fees are non-refundable once submitted.
-                </li>
-                <li>
-                  I grant The Patieaux Chick permission to use my submitted information and images for the
-                  directory, magazine features, and related promotional materials.
-                </li>
-              </ul>
+              <span className="text-sm text-[#3a2a1a]">
+                I understand that all entries are reviewed and may be declined if they do not align with The
+                Patieaux Chick's brand or community standards.
+              </span>
+            </label>
+
+            <label className="flex items-start gap-3 cursor-pointer" data-testid="ack-3">
+              <input
+                type="checkbox"
+                checked={form.ack3}
+                onChange={(e) => set("ack3", e.target.checked)}
+                className="mt-1 h-4 w-4 shrink-0 accent-[#8b5e3c] cursor-pointer"
+              />
+              <span className="text-sm text-[#3a2a1a]">
+                To maintain the integrity of The Patieaux Business Guide, all submissions are reviewed before
+                approval. Listing fees are non-refundable once submitted.
+              </span>
+            </label>
+
+            <label className="flex items-start gap-3 cursor-pointer" data-testid="ack-4">
+              <input
+                type="checkbox"
+                checked={form.ack4}
+                onChange={(e) => set("ack4", e.target.checked)}
+                className="mt-1 h-4 w-4 shrink-0 accent-[#8b5e3c] cursor-pointer"
+              />
+              <span className="text-sm text-[#3a2a1a]">
+                I grant The Patieaux Chick permission to use my submitted information and images for the
+                directory, magazine features, and related promotional materials.
+              </span>
             </label>
           </section>
 

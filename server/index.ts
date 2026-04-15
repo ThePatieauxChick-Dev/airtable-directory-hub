@@ -75,7 +75,7 @@ app.post("/api/submit-listing", upload.single("photo"), async (req, res) => {
     const {
       fullName, phone, email, cityAndState, country,
       shortBio, category, businessName, whatOffer,
-      website, socialMedia,
+      website, socialMedia, personalCategory,
     } = req.body;
 
     if (!fullName || !email || !cityAndState || !country || !businessName || !category) {
@@ -122,6 +122,22 @@ app.post("/api/submit-listing", upload.single("photo"), async (req, res) => {
 
     const result = await createResponse.json();
     const recordId = result.id as string;
+
+    // Save personal category to "Niche" field (non-fatal — field must exist in Airtable)
+    if (personalCategory) {
+      try {
+        await fetch(`${createUrl}/${recordId}`, {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ fields: { "Niche": String(personalCategory) }, typecast: true }),
+        });
+      } catch {
+        console.warn("Could not save personal category (non-fatal)");
+      }
+    }
 
     // Upload photo if provided
     if (req.file) {
