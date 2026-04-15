@@ -1,6 +1,8 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
+import { existsSync, mkdirSync, writeFileSync } from "fs";
+import { randomUUID } from "crypto";
 import multer from "multer";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -10,6 +12,11 @@ const app = express();
 const PORT = process.env.API_PORT || 3001;
 
 app.use(express.json());
+
+// ─── Uploads folder (served publicly so Airtable can download from it) ────────
+const UPLOADS_DIR = path.resolve(__dirname, "../uploads");
+if (!existsSync(UPLOADS_DIR)) mkdirSync(UPLOADS_DIR, { recursive: true });
+app.use("/uploads", express.static(UPLOADS_DIR));
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -24,6 +31,12 @@ function getRequiredEnv(name: string): string {
   const value = process.env[name];
   if (!value) throw new Error(`${name} is not configured`);
   return value;
+}
+
+function getPublicBase(): string {
+  const domain = process.env.REPLIT_DEV_DOMAIN;
+  if (domain) return `https://${domain}`;
+  return `http://localhost:${PORT}`;
 }
 
 // ─── Fetch Listings (Airtable proxy) ────────────────────────────────────────
@@ -87,7 +100,22 @@ app.post("/api/submit-listing", upload.single("photo"), async (req, res) => {
       return res.status(400).json({ error: "Invalid email address" });
     }
 
-    const fields: Record<string, string | string[]> = {
+    // Save photo to disk and build a public URL for Airtable to fetch
+    let photoAttachment: { url: string; filename: string }[] | undefined;
+    if (req.file) {
+      try {
+        const ext = req.file.originalname?.split(".").pop() || "jpg";
+        const filename = `${randomUUID()}.${ext}`;
+        writeFileSync(path.join(UPLOADS_DIR, filename), req.file.buffer);
+        const publicUrl = `${getPublicBase()}/uploads/${filename}`;
+        photoAttachment = [{ url: publicUrl, filename: req.file.originalname || filename }];
+        console.log("Photo saved, public URL:", publicUrl);
+      } catch (photoErr) {
+        console.warn("Could not save photo (non-fatal):", photoErr);
+      }
+    }
+
+    const fields: Record<string, unknown> = {
       "Full Name": String(fullName).slice(0, 200),
       "Email": String(email).slice(0, 500),
       "City and State": String(cityAndState).slice(0, 200),
@@ -102,8 +130,8 @@ app.post("/api/submit-listing", upload.single("photo"), async (req, res) => {
     if (whatOffer) fields["What Do You Offer"] = String(whatOffer).slice(0, 2000);
     if (website) fields["Website or Booking Link"] = String(website).slice(0, 500);
     if (socialMedia) fields["Social Media Link (Instagram Preferred)"] = String(socialMedia).slice(0, 200);
+    if (photoAttachment) fields["Photo"] = photoAttachment;
 
-    // Create the record first
     const createUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_ID}`;
     const createResponse = await fetch(createUrl, {
       method: "POST",
@@ -122,11 +150,12 @@ app.post("/api/submit-listing", upload.single("photo"), async (req, res) => {
 
     const result = await createResponse.json();
     const recordId = result.id as string;
+    console.log("Created Airtable record:", recordId);
 
     // Save personal category to "Niche" field (non-fatal — field must exist in Airtable)
     if (personalCategory) {
       try {
-        await fetch(`${createUrl}/${recordId}`, {
+        const patchRes = await fetch(`${createUrl}/${recordId}`, {
           method: "PATCH",
           headers: {
             Authorization: `Bearer ${AIRTABLE_API_KEY}`,
@@ -134,35 +163,12 @@ app.post("/api/submit-listing", upload.single("photo"), async (req, res) => {
           },
           body: JSON.stringify({ fields: { "Niche": String(personalCategory) }, typecast: true }),
         });
+        if (!patchRes.ok) {
+          const patchErr = await patchRes.text();
+          console.warn("Personal category save (non-fatal):", patchErr);
+        }
       } catch {
         console.warn("Could not save personal category (non-fatal)");
-      }
-    }
-
-    // Upload photo if provided
-    if (req.file) {
-      try {
-        const photoFormData = new FormData();
-        const blob = new Blob([req.file.buffer], { type: req.file.mimetype });
-        photoFormData.append("file", blob, req.file.originalname || "photo.jpg");
-        photoFormData.append("filename", req.file.originalname || "photo.jpg");
-        photoFormData.append("contentType", req.file.mimetype);
-
-        const photoUrl = `https://content.airtable.com/v0/${AIRTABLE_BASE_ID}/${recordId}/Headshot/uploadAttachment`;
-        const photoResponse = await fetch(photoUrl, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` },
-          body: photoFormData,
-        });
-
-        if (!photoResponse.ok) {
-          const photoErr = await photoResponse.text();
-          console.warn("Photo upload warning (non-fatal):", photoErr);
-        } else {
-          console.log("Photo uploaded successfully for record", recordId);
-        }
-      } catch (photoErr) {
-        console.warn("Photo upload failed (non-fatal):", photoErr);
       }
     }
 
