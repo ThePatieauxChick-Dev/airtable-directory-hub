@@ -2,12 +2,11 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Load environment variables from .env file (local development only)
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
-
+// Load .env file ONLY in local development (not on Vercel)
 if (process.env.NODE_ENV !== 'production') {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  dotenv.config({ path: path.resolve(__dirname, '../.env') });
   console.log('🔑 AIRTABLE_API_KEY loaded:', !!process.env.AIRTABLE_API_KEY);
 }
 
@@ -208,7 +207,8 @@ app.post(
 if (process.env.NODE_ENV === 'production') {
   const distPath = path.resolve(__dirname, '../dist');
   app.use(express.static(distPath));
-  app.get('*', (_req, res) => {
+  // FIX: Use '/*' instead of '*' (Express 5 compatibility)
+  app.get('/*', (_req, res) => {
     res.sendFile(path.join(distPath, 'index.html'));
   });
 }
