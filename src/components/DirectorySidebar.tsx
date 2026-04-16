@@ -51,7 +51,7 @@ const DirectorySidebar = ({
           The Patieaux Chick
         </p>
         <h2 className="font-display text-2xl font-semibold text-sidebar-foreground leading-tight">
-          Luxe Local Directory
+          Curated Directory
         </h2>
         <p className="font-editorial text-sm text-sidebar-foreground/60 italic mt-2">
           {totalListings} refined {totalListings === 1 ? "listing" : "listings"}

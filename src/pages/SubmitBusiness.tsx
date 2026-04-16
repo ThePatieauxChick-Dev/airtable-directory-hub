@@ -1,22 +1,12 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Upload } from "lucide-react";
 
-const BUSINESS_CATEGORIES = [
+const FALLBACK_BUSINESS_CATEGORIES = [
   "Food & Beverage (Curated Brands Only)",
   "Outdoor Living & Patio Design",
   "Wellness, Beauty & Self-Care",
   "Other (Subject to Approval)",
-];
-
-const PERSONAL_CATEGORIES = [
-  "Wellness",
-  "Service Provider",
-  "Business Owner",
-  "Creative",
-  "Travel",
-  "Lifestyle",
-  "Other",
 ];
 
 const COUNTRIES = [
@@ -65,6 +55,10 @@ const SubmitBusiness = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Category state — fetched from Airtable, falls back to static list
+  const [businessCategories, setBusinessCategories] = useState<string[]>(FALLBACK_BUSINESS_CATEGORIES);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+
   const [form, setForm] = useState<FormState>({
     fullName: "",
     phone: "",
@@ -85,6 +79,27 @@ const SubmitBusiness = () => {
     ack3: false,
     ack4: false,
   });
+
+  // Fetch categories from Airtable on mount
+  useEffect(() => {
+    fetch("/api/get-categories")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch categories");
+        return res.json();
+      })
+      .then((data: { categories: string[] }) => {
+        if (Array.isArray(data.categories) && data.categories.length > 0) {
+          setBusinessCategories(data.categories);
+        }
+        // If the response is empty or malformed, the fallback list stays in place
+      })
+      .catch(() => {
+        // Silently fall back to the static list — no visible error to the user
+      })
+      .finally(() => {
+        setCategoriesLoading(false);
+      });
+  }, []);
 
   function set(field: keyof FormState, value: string | boolean | File | null) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -150,10 +165,6 @@ const SubmitBusiness = () => {
       setError("Please describe what you offer.");
       return;
     }
-    if (!form.personalCategory) {
-      setError("Please select the category that best represents you.");
-      return;
-    }
     if (!form.ack1 || !form.ack2 || !form.ack3 || !form.ack4) {
       setError("Please check all four acknowledgement boxes to continue.");
       return;
@@ -211,8 +222,7 @@ const SubmitBusiness = () => {
             Apply to Be Featured
           </h1>
           <p className="font-editorial text-lg text-muted-foreground italic max-w-2xl mx-auto">
-            Because your Patieaux deserves more than just furniture. Share your business details below and let
-            us spotlight what makes your brand beautiful.
+            We support who we know. Share your business details below, and let us introduce your brand to our community of over 245,000 women.
           </p>
         </div>
       </header>
@@ -309,198 +319,158 @@ const SubmitBusiness = () => {
               Your Business Details
             </h2>
 
-            {/* Photo Upload */}
-            <div>
-              <label className={labelClass}>Upload Your Photo</label>
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full border border-[#c8a882] rounded bg-white/80 flex items-center justify-center cursor-pointer hover:bg-white transition-colors"
-                style={{ minHeight: "110px" }}
-                data-testid="upload-photo"
-              >
-                {photoPreview ? (
-                  <img
-                    src={photoPreview}
-                    alt="Preview"
-                    className="h-24 w-24 object-cover rounded"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center gap-2 py-6 text-[#9a7558]">
-                    <Upload className="h-8 w-8" />
-                    <span className="text-xs">Click to upload a photo</span>
-                  </div>
-                )}
+            <section className="space-y-4">
+              <div>
+                <label className={labelClass}>
+                  Business Name <span className="text-red-600">*</span>
+                </label>
+                <input
+                  data-testid="input-businessName"
+                  type="text"
+                  placeholder="Your business name"
+                  value={form.businessName}
+                  onChange={(e) => set("businessName", e.target.value)}
+                  className={inputClass}
+                />
               </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handlePhotoChange}
-              />
-              <p className="text-xs text-[#7a5a3a] mt-1">
-                Please upload a clear, high-quality image that represents you.
-              </p>
-            </div>
 
-            {/* Headshot Upload */}
-            <div>
-              <label className={labelClass}>Upload Your Headshot (Profile Photo)</label>
-              <div
-                onClick={() => headshotInputRef.current?.click()}
-                className="w-full border border-[#c8a882] rounded bg-white/80 flex items-center justify-center cursor-pointer hover:bg-white transition-colors"
-                style={{ minHeight: "110px" }}
-                data-testid="upload-headshot"
-              >
-                {headshotPreview ? (
-                  <img
-                    src={headshotPreview}
-                    alt="Headshot Preview"
-                    className="h-24 w-24 object-cover rounded-full"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center gap-2 py-6 text-[#9a7558]">
-                    <Upload className="h-8 w-8" />
-                    <span className="text-xs">Click to upload your headshot</span>
-                  </div>
-                )}
+              <div>
+                <label className={labelClass}>
+                  Short Bio (For Directory Display){" "}
+                  <span className="text-red-600">*</span>
+                </label>
+                <textarea
+                  data-testid="textarea-shortBio"
+                  rows={4}
+                  placeholder="Tell us who you are. This will be displayed publicly in the directory. Example: What you do, what you're known for, or what you're building."
+                  value={form.shortBio}
+                  onChange={(e) => set("shortBio", e.target.value)}
+                  className={inputClass + " resize-y"}
+                />
               </div>
-              <input
-                ref={headshotInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleHeadshotChange}
-              />
-              <p className="text-xs text-[#7a5a3a] mt-1">
-                This appears as the small profile circle on your listing card.
-              </p>
-            </div>
 
-            {/* Short Bio */}
-            <div>
-              <label className={labelClass}>
-                Short Bio (For Directory Display){" "}
-                <span className="text-red-600">*</span>
-              </label>
-              <textarea
-                data-testid="textarea-shortBio"
-                rows={4}
-                placeholder="Tell us who you are. This will be displayed publicly in the directory. Example: What you do, what you're known for, or what you're building."
-                value={form.shortBio}
-                onChange={(e) => set("shortBio", e.target.value)}
-                className={inputClass + " resize-y"}
-              />
-            </div>
+              {/* Photo Upload */}
+              <div>
+                <label className={labelClass}>Upload Your Photo</label>
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full border border-[#c8a882] rounded bg-white/80 flex items-center justify-center cursor-pointer hover:bg-white transition-colors"
+                  style={{ minHeight: "110px" }}
+                  data-testid="upload-photo"
+                >
+                  {photoPreview ? (
+                    <img
+                      src={photoPreview}
+                      alt="Preview"
+                      className="h-24 w-24 object-cover rounded"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center gap-2 py-6 text-[#9a7558]">
+                      <Upload className="h-8 w-8" />
+                      <span className="text-xs">Click to upload a photo</span>
+                    </div>
+                  )}
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handlePhotoChange}
+                />
+                <p className="text-xs text-[#7a5a3a] mt-1">
+                  Please upload a clear, high-quality image that represents you.
+                </p>
+              </div>
 
-            {/* Business Category (first) */}
-            <div>
-              <label className={labelClass}>
-                Select the category that best fits your business:{" "}
-                <span className="text-red-600">*</span>
-              </label>
-              <select
-                data-testid="select-businessCategory"
-                value={form.businessCategory}
-                onChange={(e) => set("businessCategory", e.target.value)}
-                className={inputClass}
+              {/* Business Category — fetched from Airtable */}
+              <div>
+                <label className={labelClass}>
+                  Select the category that best fits your business:{" "}
+                  <span className="text-red-600">*</span>
+                </label>
+                <select
+                  data-testid="select-businessCategory"
+                  value={form.businessCategory}
+                  onChange={(e) => set("businessCategory", e.target.value)}
+                  disabled={categoriesLoading}
+                  className={inputClass}
+                >
+                  <option value="" disabled>
+                    {categoriesLoading ? "Loading categories…" : "Select a category…"}
+                  </option>
+                  {businessCategories.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* ── IMPORTANT NOTE ── */}
+              <div
+                className="rounded-lg p-5 space-y-2"
+                style={{ backgroundColor: "#eedcc4", border: "1px solid #c8a882" }}
               >
-                <option value="" disabled>Select a category…</option>
-                {BUSINESS_CATEGORIES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
+                <h3 className="text-base font-bold text-[#1a1008]">Important Note</h3>
+                <p className="text-sm text-[#3a2a1a] leading-relaxed">
+                  We are intentional about the businesses we feature. The Patieaux Business Guide is a curated
+                  directory, and all submissions are reviewed to ensure alignment with our brand, audience, and
+                  overall experience. If your business falls outside the listed categories, you may select{" "}
+                  <strong>"Other (Subject to Approval)."</strong>
+                </p>
+              </div>
+
+              <div>
+                <label className={labelClass}>
+                  What Do You Offer? <span className="text-red-600">*</span>
+                </label>
+                <textarea
+                  data-testid="textarea-whatOffer"
+                  rows={3}
+                  placeholder="Briefly describe your product, service, or offering."
+                  value={form.whatOffer}
+                  onChange={(e) => set("whatOffer", e.target.value)}
+                  className={inputClass + " resize-y"}
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>Website or Booking Link</label>
+                <input
+                  data-testid="input-website"
+                  type="url"
+                  placeholder="https://yourwebsite.com"
+                  value={form.website}
+                  onChange={(e) => set("website", e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>
+                  Social Media Link (Instagram preferred)
+                </label>
+                <input
+                  data-testid="input-socialMedia"
+                  type="text"
+                  placeholder="https://instagram.com/yourhandle"
+                  value={form.socialMedia}
+                  onChange={(e) => set("socialMedia", e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+            </section>
           </section>
 
-          {/* ── IMPORTANT NOTE ── */}
+          {/* ── REVIEW CALLOUT ── */}
           <div
             className="rounded-lg p-5 space-y-2"
             style={{ backgroundColor: "#eedcc4", border: "1px solid #c8a882" }}
           >
-            <h3 className="text-base font-bold text-[#1a1008]">Important Note</h3>
+            <h3 className="text-base font-bold text-[#1a1008]">Pause here. Review your details before you proceed.</h3>
             <p className="text-sm text-[#3a2a1a] leading-relaxed">
-              We are intentional about the businesses we feature. The Patieaux Business Guide is a curated
-              directory, and all submissions are reviewed to ensure alignment with our brand, audience, and
-              overall experience. If your business falls outside the listed categories, you may select{" "}
-              <strong>"Other (Subject to Approval)."</strong>
+              Please <strong>review your submission</strong> carefully before proceeding. Once submitted, your entry enters our review queue. While backend edits are possible, we encourage you to double-check all details so your listing reflects exactly what you want the Patieaux community to see.
             </p>
           </div>
-
-          {/* ── Business Name, Offer, Links, Personal Category ── */}
-          <section className="space-y-4">
-            <div>
-              <label className={labelClass}>
-                Business Name <span className="text-red-600">*</span>
-              </label>
-              <input
-                data-testid="input-businessName"
-                type="text"
-                placeholder="Your business name"
-                value={form.businessName}
-                onChange={(e) => set("businessName", e.target.value)}
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label className={labelClass}>
-                What Do You Offer? <span className="text-red-600">*</span>
-              </label>
-              <textarea
-                data-testid="textarea-whatOffer"
-                rows={3}
-                placeholder="Briefly describe your product, service, or offering."
-                value={form.whatOffer}
-                onChange={(e) => set("whatOffer", e.target.value)}
-                className={inputClass + " resize-y"}
-              />
-            </div>
-
-            <div>
-              <label className={labelClass}>Website or Booking Link</label>
-              <input
-                data-testid="input-website"
-                type="url"
-                placeholder="https://yourwebsite.com"
-                value={form.website}
-                onChange={(e) => set("website", e.target.value)}
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label className={labelClass}>
-                Social Media Link (Instagram preferred)
-              </label>
-              <input
-                data-testid="input-socialMedia"
-                type="text"
-                placeholder="https://instagram.com/yourhandle"
-                value={form.socialMedia}
-                onChange={(e) => set("socialMedia", e.target.value)}
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label className={labelClass}>
-                Select the category that best represents you:{" "}
-                <span className="text-red-600">*</span>
-              </label>
-              <select
-                data-testid="select-personalCategory"
-                value={form.personalCategory}
-                onChange={(e) => set("personalCategory", e.target.value)}
-                className={inputClass}
-              >
-                <option value="" disabled>Select a category…</option>
-                {PERSONAL_CATEGORIES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-          </section>
 
           {/* ── ACKNOWLEDGEMENT ── */}
           <section className="space-y-4">
@@ -542,7 +512,7 @@ const SubmitBusiness = () => {
                 className="mt-1 h-4 w-4 shrink-0 accent-[#8b5e3c] cursor-pointer"
               />
               <span className="text-sm text-[#3a2a1a]">
-                To maintain the integrity of The Patieaux Business Guide, all submissions are reviewed before
+                I understand that to maintain the integrity of The Patieaux Business Guide, all submissions are reviewed before
                 approval. Listing fees are non-refundable once submitted.
               </span>
             </label>

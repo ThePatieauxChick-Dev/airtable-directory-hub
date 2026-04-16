@@ -205,6 +205,42 @@ app.post(
   }
 );
 
+// ─── Get Categories (for dropdown in submit form) ─────────────────────────
+app.get('/api/get-categories', async (_req, res) => {
+  try {
+    const AIRTABLE_API_KEY = getRequiredEnv('AIRTABLE_API_KEY');
+    const AIRTABLE_BASE_ID = getRequiredEnv('AIRTABLE_BASE_ID');
+    const AIRTABLE_TABLE_ID = getRequiredEnv('AIRTABLE_TABLE_ID');
+
+    // Fetch the table metadata to get the Category field's select options
+    const url = `https://api.airtable.com/v0/meta/bases/${AIRTABLE_BASE_ID}/tables`;
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` },
+    });
+
+    if (!response.ok) {
+      // If metadata fetch fails, fall back to static list
+      throw new Error(`Airtable metadata error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const table = data.tables?.find((t: any) => t.id === AIRTABLE_TABLE_ID);
+    const categoryField = table?.fields?.find((f: any) => f.name === 'Category');
+
+    if (categoryField?.options?.choices) {
+      const categories = categoryField.options.choices.map((c: any) => c.name);
+      res.json({ categories });
+    } else {
+      // Fallback if field not found
+      res.json({ categories: [] });
+    }
+  } catch (error) {
+    console.warn('Could not fetch categories from Airtable, using fallback list');
+    // Return empty to let frontend use its fallback
+    res.json({ categories: [] });
+  }
+});
+
 // ─── Serve Frontend (only in production) ─────────────────────────────────────
 if (process.env.NODE_ENV === 'production') {
   const distPath = path.resolve(__dirname, '../dist');
