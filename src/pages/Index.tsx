@@ -151,7 +151,7 @@ const Index = () => {
             asChild
             className="bg-primary hover:bg-primary/90 text-primary-foreground font-sans text-xs sm:text-sm shadow-luxury rounded-full px-3 sm:px-6 py-2 h-auto shrink-0"
           >
-            <Link to="/submit">Get Featured</Link>
+            <Link to="https://bit.ly/thepatieauxbusinessguide">Get Featured</Link>
           </Button>
         </header>
 
