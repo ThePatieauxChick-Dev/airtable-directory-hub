@@ -423,7 +423,7 @@ const SubmitBusiness = () => {
               </div>
 
               <div>
-                <label className={labelClass}>Upload Your Business Photo</label>
+                <label className={labelClass}>Upload Your Photo</label>
                 <div
                   onClick={() => fileInputRef.current?.click()}
                   className="w-full border border-[#c8a882] rounded bg-white/80 flex items-center justify-center cursor-pointer hover:bg-white transition-colors"
@@ -451,7 +451,7 @@ const SubmitBusiness = () => {
                   onChange={handlePhotoChange}
                 />
                 <p className="text-xs text-[#7a5a3a] mt-1">
-                  Please upload a clear, high-quality image that represents your business. Max size: {MAX_FILE_SIZE_MB} MB.
+                  Please upload a clear, high-quality image that represents you. Max size: {MAX_FILE_SIZE_MB} MB.
                 </p>
               </div>
 

@@ -46,7 +46,7 @@ function setCached(key: string, data: any, ttlSeconds: number = 300) {
 // ─── Multer setup (memory storage – no disk writes) ────────────────────────
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 4 * 1024 * 1024 }, // 4 MB (reduced from 8 MB to stay under Vercel/Airtable limits)
+  limits: { fileSize: 8 * 1024 * 1024 }, // 8 MB
   fileFilter: (_req, file, cb) => {
     if (file.mimetype.startsWith('image/')) cb(null, true);
     else cb(new Error('Only image files are allowed'));
@@ -116,25 +116,13 @@ app.get('/api/listings', async (_req, res) => {
   }
 });
 
-// ─── Submit Business Listing (with explicit error handling for size) ───────
+// ─── Submit Business Listing (uploads go directly to Airtable) ──────────────
 app.post(
   '/api/submit-listing',
-  (req, res, next) => {
-    upload.fields([
-      { name: 'photo', maxCount: 1 },
-      { name: 'headshot', maxCount: 1 },
-    ])(req, res, (err: any) => {
-      if (err instanceof multer.MulterError) {
-        if (err.code === 'LIMIT_FILE_SIZE') {
-          return res.status(400).json({ error: 'File too large. Maximum size is 4 MB.' });
-        }
-        return res.status(400).json({ error: err.message });
-      } else if (err) {
-        return res.status(400).json({ error: err.message });
-      }
-      next();
-    });
-  },
+  upload.fields([
+    { name: 'photo', maxCount: 1 },
+    { name: 'headshot', maxCount: 1 },
+  ]),
   async (req, res) => {
     try {
       const AIRTABLE_API_KEY = getRequiredEnv('AIRTABLE_API_KEY');
