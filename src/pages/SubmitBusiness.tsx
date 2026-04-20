@@ -295,6 +295,39 @@ const SubmitBusiness = () => {
               />
             </div>
 
+            {/* Headshot Upload */}
+            <div>
+              <label className={labelClass}>Upload Your Headshot</label>
+              <div
+                onClick={() => headshotInputRef.current?.click()}
+                className="w-full border border-[#c8a882] rounded bg-white/80 flex items-center justify-center cursor-pointer hover:bg-white transition-colors"
+                style={{ minHeight: "110px" }}
+                data-testid="upload-headshot"
+              >
+                {headshotPreview ? (
+                  <img
+                    src={headshotPreview}
+                    alt="Headshot Preview"
+                    className="h-24 w-24 object-cover rounded"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center gap-2 py-6 text-[#9a7558]">
+                    <Upload className="h-8 w-8" />
+                    <span className="text-xs">Click to upload a headshot</span>
+                  </div>
+                )}
+              </div>
+              <input
+                ref={headshotInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleHeadshotChange}
+              />
+              <p className="text-xs text-[#7a5a3a] mt-1">
+                Please upload a professional headshot. Max size: {MAX_FILE_SIZE_MB} MB.
+              </p>
+            </div>
             <div>
               <label className={labelClass}>Phone</label>
               <input
@@ -390,7 +423,7 @@ const SubmitBusiness = () => {
               </div>
 
               <div>
-                <label className={labelClass}>Upload Your Photo</label>
+                <label className={labelClass}>Upload Your Business Photo</label>
                 <div
                   onClick={() => fileInputRef.current?.click()}
                   className="w-full border border-[#c8a882] rounded bg-white/80 flex items-center justify-center cursor-pointer hover:bg-white transition-colors"
@@ -418,7 +451,7 @@ const SubmitBusiness = () => {
                   onChange={handlePhotoChange}
                 />
                 <p className="text-xs text-[#7a5a3a] mt-1">
-                  Please upload a clear, high-quality image that represents you. Max size: {MAX_FILE_SIZE_MB} MB.
+                  Please upload a clear, high-quality image that represents your business. Max size: {MAX_FILE_SIZE_MB} MB.
                 </p>
               </div>
 
