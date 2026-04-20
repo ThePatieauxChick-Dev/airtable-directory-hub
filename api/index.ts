@@ -239,7 +239,7 @@ app.get('/api/get-categories', async (_req, res) => {
     // Return empty to let frontend use its fallback
     res.json({ categories: [] });
   }
-});
+}); 
 
 // ─── Serve Frontend (only in production) ─────────────────────────────────────
 if (process.env.NODE_ENV === 'production') {

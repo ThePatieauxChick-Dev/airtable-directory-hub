@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Upload } from "lucide-react";
+import { ArrowLeft, Upload, CheckCircle } from "lucide-react";
 
 const FALLBACK_BUSINESS_CATEGORIES = [
   "Food & Beverage (Curated Brands Only)",
@@ -18,8 +18,6 @@ const COUNTRIES = [
   "France", "Germany", "Netherlands", "Italy", "Spain", "Portugal",
   "New Zealand", "Ireland", "Scotland", "Wales", "Other",
 ];
-
-const REDIRECT_URL = "http://bit.ly/thepatieauxbusinessguide";
 
 const inputClass =
   "w-full border border-[#c8a882] rounded px-3 py-2 bg-white/90 text-[#3a2a1a] placeholder-[#b09070] text-sm focus:outline-none focus:ring-2 focus:ring-[#c8a882] focus:border-transparent";
@@ -47,6 +45,27 @@ interface FormState {
   ack4: boolean;
 }
 
+const initialFormState: FormState = {
+  fullName: "",
+  phone: "",
+  email: "",
+  cityAndState: "",
+  country: "",
+  photo: null,
+  headshot: null,
+  shortBio: "",
+  businessCategory: "",
+  businessName: "",
+  whatOffer: "",
+  website: "",
+  socialMedia: "",
+  personalCategory: "",
+  ack1: false,
+  ack2: false,
+  ack3: false,
+  ack4: false,
+};
+
 const SubmitBusiness = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const headshotInputRef = useRef<HTMLInputElement>(null);
@@ -54,31 +73,13 @@ const SubmitBusiness = () => {
   const [headshotPreview, setHeadshotPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   // Category state — fetched from Airtable, falls back to static list
   const [businessCategories, setBusinessCategories] = useState<string[]>(FALLBACK_BUSINESS_CATEGORIES);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
 
-  const [form, setForm] = useState<FormState>({
-    fullName: "",
-    phone: "",
-    email: "",
-    cityAndState: "",
-    country: "",
-    photo: null,
-    headshot: null,
-    shortBio: "",
-    businessCategory: "",
-    businessName: "",
-    whatOffer: "",
-    website: "",
-    socialMedia: "",
-    personalCategory: "",
-    ack1: false,
-    ack2: false,
-    ack3: false,
-    ack4: false,
-  });
+  const [form, setForm] = useState<FormState>(initialFormState);
 
   // Fetch categories from Airtable on mount
   useEffect(() => {
@@ -196,13 +197,56 @@ const SubmitBusiness = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Submission failed");
 
-      window.location.href = REDIRECT_URL;
+      // Show success message instead of redirecting
+      setSuccess(true);
+      setSubmitting(false);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
       setSubmitting(false);
     }
   }
 
+  // Success view
+  if (success) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-card rounded-2xl shadow-luxury-lg p-8 text-center border border-border">
+          <div className="flex justify-center mb-6">
+            <div className="h-16 w-16 rounded-full bg-green-100 flex items-center justify-center">
+              <CheckCircle className="h-10 w-10 text-green-600" />
+            </div>
+          </div>
+          <h2 className="font-display text-2xl font-semibold text-foreground mb-3">
+            Application Received!
+          </h2>
+          <p className="font-editorial text-muted-foreground italic mb-6">
+            Thank you for your submission. You will receive an email shortly with next steps.
+          </p>
+          <div className="flex flex-col gap-3">
+            <Link
+              to="/"
+              className="inline-flex items-center justify-center gap-2 px-6 py-2 rounded-full bg-primary text-primary-foreground font-sans text-sm hover:bg-primary/90 transition-colors"
+            >
+              Return to Directory
+            </Link>
+            <button
+              onClick={() => {
+                setSuccess(false);
+                setForm(initialFormState);
+                setPhotoPreview(null);
+                setHeadshotPreview(null);
+              }}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Submit another business
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Form view
   return (
     <div className="min-h-screen bg-background">
       <header className="relative py-14 px-6 text-center border-b border-border overflow-hidden">
@@ -549,7 +593,7 @@ const SubmitBusiness = () => {
             className="w-full py-3 rounded-full font-semibold text-white text-sm tracking-wide transition-opacity disabled:opacity-60"
             style={{ backgroundColor: "#8b5e3c" }}
           >
-            {submitting ? "Submitting…" : "Proceed to Payment"}
+            {submitting ? "Submitting…" : "Submit"}
           </button>
         </form>
       </main>
