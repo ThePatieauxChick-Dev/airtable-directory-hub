@@ -25,7 +25,7 @@ const ListingCard = ({ listing, index, onClick }: ListingCardProps) => {
           <img
             src={listing.businessPhoto}
             alt={listing.businessName}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            className="w-fit h-fit object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
             loading="lazy"
           />
         ) : (
@@ -36,16 +36,16 @@ const ListingCard = ({ listing, index, onClick }: ListingCardProps) => {
           </div>
         )}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/0 via-black/5 to-black/5" />
 
         <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
-          <span className="bg-primary/90 text-primary-foreground text-[10px] font-sans uppercase tracking-[0.15em] px-3 py-1 rounded-full backdrop-blur-sm">
+          <span className="bg-primary/60 text-primary-foreground text-[10px] font-sans uppercase tracking-[0.15em] px-3 py-1 rounded-full backdrop-blur-sm">
             {listing.category}
           </span>
         </div>
 
         {listing.ownerHeadshot && (
-          <div className="absolute bottom-3 right-3 w-11 h-11 rounded-full border-2 border-card overflow-hidden shadow-luxury">
+          <div className="absolute bottom-3 right-3 w-16 h-16 rounded-full border-2 border-card overflow-hidden shadow-luxury">
             <img
               src={listing.ownerHeadshot}
               alt={`Owner of ${listing.businessName}`}

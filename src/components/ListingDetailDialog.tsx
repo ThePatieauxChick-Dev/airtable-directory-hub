@@ -26,12 +26,12 @@ const ListingDetailDialog = ({ listing, open, onOpenChange }: ListingDetailDialo
         </VisuallyHidden>
 
         {/* Hero Image Section */}
-        <div className="relative h-60 overflow-hidden bg-muted">
+        <div className="relative h-72 w-fit overflow-hidden bg-muted">
           {listing.businessPhoto ? (
             <img
               src={listing.businessPhoto}
               alt={listing.businessName}
-              className="w-full h-full object-cover"
+              className="mb-20 w-fit h-fit object-cover"
             />
           ) : (
             <div className="w-full h-full bg-gradient-luxury flex items-center justify-center">
@@ -41,7 +41,7 @@ const ListingDetailDialog = ({ listing, open, onOpenChange }: ListingDetailDialo
             </div>
           )}
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-black/10" />
 
           <span className="absolute top-4 left-4 bg-primary/90 text-primary-foreground text-xs font-sans uppercase tracking-wider px-4 py-1.5 rounded-full backdrop-blur-sm">
             {listing.category}
@@ -85,7 +85,7 @@ const ListingDetailDialog = ({ listing, open, onOpenChange }: ListingDetailDialo
             {listing.description && (
               <div className="bg-secondary/30 rounded-2xl p-4 border border-border/40">
                 <p className="text-xs uppercase tracking-wider text-muted-foreground font-sans mb-2">About</p>
-                <p className="text-sm text-muted-foreground font-editorial leading-relaxed italic">
+                <p className="text-base font-editorial leading-relaxed font-bold italic">
                   {listing.description}
                 </p>
               </div>
