@@ -25,7 +25,7 @@ const ListingCard = ({ listing, index, onClick }: ListingCardProps) => {
           <img
             src={listing.businessPhoto}
             alt={listing.businessName}
-            className="w-fit h-fit object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            className="w-fit h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
             loading="lazy"
           />
         ) : (

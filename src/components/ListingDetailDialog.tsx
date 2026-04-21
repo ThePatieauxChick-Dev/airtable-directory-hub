@@ -48,7 +48,7 @@ const ListingDetailDialog = ({ listing, open, onOpenChange }: ListingDetailDialo
           </span>
 
           {listing.ownerHeadshot && (
-            <div className="absolute bottom-4 right-4 w-14 h-14 rounded-full border-[3px] border-card overflow-hidden shadow-luxury">
+            <div className="absolute bottom-4 right-4 w-28 h-28 rounded-full border-[3px] border-card overflow-hidden shadow-luxury">
               <img
                 src={listing.ownerHeadshot}
                 alt={`Owner of ${listing.businessName}`}
